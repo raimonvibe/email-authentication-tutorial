@@ -2,16 +2,143 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
-import { Copy, Mail, Lock, Shield, Code, CheckCircle } from 'lucide-react'
+import { Input } from './components/ui/input'
+import { Label } from './components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
+import { Copy, Mail, Lock, Shield, Code, CheckCircle, User, Eye, EyeOff } from 'lucide-react'
 import './App.css'
 
+interface User {
+  id: string
+  email: string
+  is_verified: boolean
+  created_at: string
+}
+
 function App() {
+  const [user, setUser] = useState<User | null>(null)
+  const [currentView, setCurrentView] = useState<'tutorial' | 'auth' | 'verify' | 'dashboard'>('tutorial')
+  const [pendingEmail, setPendingEmail] = useState<string>('')
+  const [verificationCode, setVerificationCode] = useState<string>('')
+  const [message, setMessage] = useState<string>('')
+  const [error, setError] = useState<string>('')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [signupForm, setSignupForm] = useState({
+    email: '',
+    password: ''
+  })
+  const [loginForm, setLoginForm] = useState({
+    email: '',
+    password: ''
+  })
 
   const copyToClipboard = (code: string, id: string) => {
     navigator.clipboard.writeText(code)
     setCopiedCode(id)
     setTimeout(() => setCopiedCode(null), 2000)
+  }
+
+  const toggleCodeVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(signupForm),
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Signup failed')
+      }
+      
+      setPendingEmail(signupForm.email)
+      setMessage(`Account created! Verification code: ${data.verification_code}`)
+      setCurrentView('verify')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
+
+  const handleVerification = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/verify-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: pendingEmail,
+          verification_code: verificationCode
+        }),
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Verification failed')
+      }
+      
+      setMessage('Email verified successfully! You can now log in.')
+      setCurrentView('auth')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginForm),
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Login failed')
+      }
+      
+      setUser(data.user)
+      localStorage.setItem('token', data.access_token)
+      setCurrentView('dashboard')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
+
+  const handleLogout = () => {
+    setUser(null)
+    localStorage.removeItem('token')
+    setCurrentView('tutorial')
+    setSignupForm({ email: '', password: '' })
+    setLoginForm({ email: '', password: '' })
+    setVerificationCode('')
+    setPendingEmail('')
+    setMessage('')
+    setError('')
   }
 
   const CodeBlock = ({ code, language, id }: { code: string; language: string; id: string }) => (
@@ -54,14 +181,175 @@ function App() {
           </div>
         </header>
 
-        <div className="grid gap-8">
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">1</div>
-                <CardTitle className="text-2xl text-white">Introduction: What You'll Learn</CardTitle>
-              </div>
-            </CardHeader>
+        <div className="flex justify-center mb-8">
+          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as any)} className="w-full max-w-4xl">
+            <TabsList className="grid w-full grid-cols-4 bg-gray-800">
+              <TabsTrigger value="tutorial" className="text-white">Tutorial</TabsTrigger>
+              <TabsTrigger value="auth" className="text-white">Demo</TabsTrigger>
+              <TabsTrigger value="verify" className="text-white" disabled={!pendingEmail}>Verify</TabsTrigger>
+              <TabsTrigger value="dashboard" className="text-white" disabled={!user}>Dashboard</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="tutorial" className="mt-8">
+              <div className="grid gap-8">
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">0</div>
+                      <CardTitle className="text-2xl text-white">Project Setup from Scratch</CardTitle>
+                    </div>
+                    <CardDescription className="text-gray-400">
+                      Complete beginner guide: Install Node.js, create React project, set up file structure, and copy code
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4">
+                      <h4 className="text-yellow-300 font-medium mb-2">📋 Prerequisites</h4>
+                      <p className="text-yellow-100 text-sm">This tutorial will guide you through creating this project from scratch. No prior experience required!</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 1: Install Node.js</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">First, install Node.js on your computer:</p>
+                        <ol className="list-decimal list-inside space-y-2 text-sm text-gray-400">
+                          <li>Go to <span className="text-blue-400">https://nodejs.org</span></li>
+                          <li>Download the LTS (Long Term Support) version</li>
+                          <li>Run the installer and follow the setup wizard</li>
+                          <li>Open terminal/command prompt and verify installation:</li>
+                        </ol>
+                        <div className="mt-3 bg-black p-3 rounded border">
+                          <code className="text-green-400 text-sm">
+                            node --version<br/>
+                            npm --version
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 2: Create Project Directory</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Create a new directory for your project:</p>
+                        <div className="bg-black p-3 rounded border">
+                          <code className="text-green-400 text-sm">
+                            mkdir email-auth-tutorial<br/>
+                            cd email-auth-tutorial
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 3: Create Backend (FastAPI)</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Set up the Python backend:</p>
+                        <div className="bg-black p-3 rounded border mb-3">
+                          <code className="text-green-400 text-sm">
+                            mkdir auth-backend<br/>
+                            cd auth-backend<br/>
+                            pip install fastapi uvicorn python-jose bcrypt python-multipart email-validator
+                          </code>
+                        </div>
+                        <p className="text-gray-300 text-sm mb-2">Create the file structure:</p>
+                        <div className="bg-black p-3 rounded border">
+                          <code className="text-gray-400 text-sm">
+                            auth-backend/<br/>
+                            ├── app/<br/>
+                            │   └── main.py<br/>
+                            └── requirements.txt
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 4: Create Frontend (React)</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Set up the React frontend:</p>
+                        <div className="bg-black p-3 rounded border mb-3">
+                          <code className="text-green-400 text-sm">
+                            cd ..<br/>
+                            npm create vite@latest auth-frontend -- --template react-ts<br/>
+                            cd auth-frontend<br/>
+                            npm install<br/>
+                            npm install @radix-ui/react-tabs @radix-ui/react-label lucide-react
+                          </code>
+                        </div>
+                        <p className="text-gray-300 text-sm mb-2">Your project structure should now look like:</p>
+                        <div className="bg-black p-3 rounded border">
+                          <code className="text-gray-400 text-sm">
+                            email-auth-tutorial/<br/>
+                            ├── auth-backend/<br/>
+                            │   ├── app/<br/>
+                            │   │   └── main.py<br/>
+                            │   └── requirements.txt<br/>
+                            └── auth-frontend/<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;├── src/<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;│   ├── App.tsx<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;│   └── components/<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;└── package.json
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 5: Copy Backend Code</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">auth-backend/app/main.py</code> and copy the FastAPI code from Section 1 below.</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 6: Copy Frontend Code</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Replace <code className="bg-gray-800 px-2 py-1 rounded">auth-frontend/src/App.tsx</code> with the React code from Section 2 below.</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 7: Run Your Application</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Start both servers:</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-white mb-2">Backend (Terminal 1):</p>
+                            <div className="bg-black p-3 rounded border">
+                              <code className="text-green-400 text-sm">
+                                cd auth-backend<br/>
+                                uvicorn app.main:app --reload
+                              </code>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white mb-2">Frontend (Terminal 2):</p>
+                            <div className="bg-black p-3 rounded border">
+                              <code className="text-green-400 text-sm">
+                                cd auth-frontend<br/>
+                                npm run dev
+                              </code>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-4 bg-green-900/20 border border-green-700 rounded p-3">
+                          <p className="text-green-300 text-sm">
+                            ✅ Your app will be available at <code className="bg-green-800 px-2 py-1 rounded">http://localhost:5173</code><br/>
+                            ✅ Backend API at <code className="bg-green-800 px-2 py-1 rounded">http://localhost:8000</code>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">1</div>
+                      <CardTitle className="text-2xl text-white">Introduction: What You'll Learn</CardTitle>
+                    </div>
+                  </CardHeader>
             <CardContent className="text-gray-300 space-y-4">
               <p>
                 In this tutorial, you'll learn how to create a complete email authentication system that includes:
@@ -929,35 +1217,242 @@ app.listen(PORT, () => {
           </Card>
 
           <Card className="bg-gradient-to-r from-purple-800 to-pink-800 border-purple-600">
-            <CardHeader>
-              <CardTitle className="text-2xl text-white text-center">🎉 Congratulations!</CardTitle>
-              <CardDescription className="text-center text-purple-200">
-                You now understand how to build complete email authentication systems
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-purple-100">
-                You've learned how to create signup forms, implement login functionality, 
-                integrate email verification with Formspree, and build secure backend authentication logic.
-              </p>
-              <div className="flex justify-center gap-4 flex-wrap">
-                <Badge className="bg-green-600 text-white">Frontend Forms ✓</Badge>
-                <Badge className="bg-blue-600 text-white">Backend Logic ✓</Badge>
-                <Badge className="bg-pink-600 text-white">Email Verification ✓</Badge>
-                <Badge className="bg-purple-600 text-white">Security Best Practices ✓</Badge>
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-white text-center">🎉 Congratulations!</CardTitle>
+                    <CardDescription className="text-center text-purple-200">
+                      You now understand how to build complete email authentication systems
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center space-y-4">
+                    <p className="text-purple-100">
+                      You've learned how to create signup forms, implement login functionality, 
+                      integrate email verification, and build secure backend authentication logic.
+                    </p>
+                    <div className="flex justify-center gap-4 flex-wrap">
+                      <Badge className="bg-green-600 text-white">Frontend Forms ✓</Badge>
+                      <Badge className="bg-blue-600 text-white">Backend Logic ✓</Badge>
+                      <Badge className="bg-pink-600 text-white">Email Verification ✓</Badge>
+                      <Badge className="bg-purple-600 text-white">Security Best Practices ✓</Badge>
+                    </div>
+                    <div className="bg-white/10 p-4 rounded-lg">
+                      <h4 className="font-semibold text-white mb-2">Next Steps:</h4>
+                      <ul className="text-sm text-purple-100 space-y-1">
+                        <li>• Implement password reset functionality</li>
+                        <li>• Add social login options (Google, GitHub)</li>
+                        <li>• Build user profile management</li>
+                        <li>• Add two-factor authentication</li>
+                        <li>• Implement role-based access control</li>
+                      </ul>
+                    </div>
+                    <div className="mt-6">
+                      <Button 
+                        onClick={() => setCurrentView('auth')} 
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      >
+                        Try the Live Demo →
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="bg-white/10 p-4 rounded-lg">
-                <h4 className="font-semibold text-white mb-2">Next Steps:</h4>
-                <ul className="text-sm text-purple-100 space-y-1">
-                  <li>• Implement password reset functionality</li>
-                  <li>• Add social login options (Google, GitHub)</li>
-                  <li>• Build user profile management</li>
-                  <li>• Add two-factor authentication</li>
-                  <li>• Implement role-based access control</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
+            </TabsContent>
+
+            <TabsContent value="auth" className="mt-8">
+              <Card className="bg-gray-800 border-gray-700 max-w-md mx-auto">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-white text-center">Authentication Demo</CardTitle>
+                  <CardDescription className="text-center text-gray-400">
+                    Try the working authentication system
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {message && (
+                    <div className="bg-green-900/20 border border-green-700 rounded p-3">
+                      <p className="text-green-300 text-sm">{message}</p>
+                    </div>
+                  )}
+                  {error && (
+                    <div className="bg-red-900/20 border border-red-700 rounded p-3">
+                      <p className="text-red-300 text-sm">{error}</p>
+                    </div>
+                  )}
+
+                  <Tabs defaultValue="signup" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 bg-gray-700">
+                      <TabsTrigger value="signup" className="text-white">Sign Up</TabsTrigger>
+                      <TabsTrigger value="login" className="text-white">Log In</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="signup" className="space-y-4">
+                      <form onSubmit={handleSignup} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="signup-email" className="text-white">Email</Label>
+                          <Input
+                            id="signup-email"
+                            type="email"
+                            value={signupForm.email}
+                            onChange={(e) => setSignupForm({...signupForm, email: e.target.value})}
+                            className="bg-gray-700 border-gray-600 text-white"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="signup-password" className="text-white">Password</Label>
+                          <div className="relative">
+                            <Input
+                              id="signup-password"
+                              type={showPassword ? "text" : "password"}
+                              value={signupForm.password}
+                              onChange={(e) => setSignupForm({...signupForm, password: e.target.value})}
+                              className="bg-gray-700 border-gray-600 text-white pr-10"
+                              required
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                              onClick={toggleCodeVisibility}
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </div>
+                        <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
+                          Create Account
+                        </Button>
+                      </form>
+                    </TabsContent>
+
+                    <TabsContent value="login" className="space-y-4">
+                      <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="login-email" className="text-white">Email</Label>
+                          <Input
+                            id="login-email"
+                            type="email"
+                            value={loginForm.email}
+                            onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                            className="bg-gray-700 border-gray-600 text-white"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="login-password" className="text-white">Password</Label>
+                          <div className="relative">
+                            <Input
+                              id="login-password"
+                              type={showPassword ? "text" : "password"}
+                              value={loginForm.password}
+                              onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                              className="bg-gray-700 border-gray-600 text-white pr-10"
+                              required
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                              onClick={toggleCodeVisibility}
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </div>
+                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+                          Sign In
+                        </Button>
+                      </form>
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="verify" className="mt-8">
+              <Card className="bg-gray-800 border-gray-700 max-w-md mx-auto">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-white text-center">Email Verification</CardTitle>
+                  <CardDescription className="text-center text-gray-400">
+                    Enter the 5-digit code sent to {pendingEmail}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {message && (
+                    <div className="bg-green-900/20 border border-green-700 rounded p-3">
+                      <p className="text-green-300 text-sm">{message}</p>
+                    </div>
+                  )}
+                  {error && (
+                    <div className="bg-red-900/20 border border-red-700 rounded p-3">
+                      <p className="text-red-300 text-sm">{error}</p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleVerification} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="verification-code" className="text-white">Verification Code</Label>
+                      <Input
+                        id="verification-code"
+                        type="text"
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value)}
+                        className="bg-gray-700 border-gray-600 text-white text-center text-2xl tracking-widest"
+                        placeholder="12345"
+                        maxLength={5}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+                      Verify Email
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="dashboard" className="mt-8">
+              <Card className="bg-gray-800 border-gray-700 max-w-2xl mx-auto">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-white text-center">Welcome to Your Dashboard</CardTitle>
+                  <CardDescription className="text-center text-gray-400">
+                    You have successfully authenticated!
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {user && (
+                    <div className="bg-gradient-to-r from-green-900/20 to-blue-900/20 border border-green-700 rounded-lg p-6">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                          <User className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-semibold text-white">{user.email}</h3>
+                          <p className="text-gray-400">User ID: {user.id}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-400">Status</p>
+                          <p className="text-green-400 font-medium">✓ Verified</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400">Member Since</p>
+                          <p className="text-white">{new Date(user.created_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-center">
+                    <Button onClick={handleLogout} variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+                      Sign Out
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
         <footer className="text-center mt-12 py-8 border-t border-gray-700">
