@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "functions": {
+    "api/signup.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/verify-email.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/login.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/dashboard.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/users.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/healthz.py": {
+      "runtime": "@vercel/python"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/signup",
+      "dest": "/api/signup.py"
+    },
+    {
+      "src": "/api/verify-email",
+      "dest": "/api/verify-email.py"
+    },
+    {
+      "src": "/api/login",
+      "dest": "/api/login.py"
+    },
+    {
+      "src": "/api/dashboard",
+      "dest": "/api/dashboard.py"
+    },
+    {
+      "src": "/api/users",
+      "dest": "/api/users.py"
+    },
+    {
+      "src": "/healthz",
+      "dest": "/api/healthz.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/$1"
+    }
+  ],
+  "env": {
+    "SECRET_KEY": "@secret_key"
+  }
+}
