@@ -49,8 +49,5 @@
       "src": "/(.*)",
       "dest": "/dist/$1"
     }
-  ],
-  "env": {
-    "SECRET_KEY": "@secret_key"
-  }
+  ]
 }
