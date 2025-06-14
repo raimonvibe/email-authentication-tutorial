@@ -21,12 +21,40 @@ class handler(BaseHTTPRequestHandler):
             user_data = UserSignup(**json.loads(body))
             
             if user_data.email in users_db:
-                self.send_response(400)
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"detail": "User with this email already exists"}).encode())
-                return
+                existing_user = users_db[user_data.email]
+                if existing_user["is_verified"]:
+                    self.send_response(400)
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"detail": "User with this email already exists"}).encode())
+                    return
+                else:
+                    print(f"DEBUG: User {user_data.email} exists but not verified, allowing resend")
+                    verification_code = generate_verification_code()
+                    users_db[user_data.email]["verification_code"] = verification_code
+                    verification_codes[user_data.email] = verification_code
+                    
+                    email_sent = self.send_verification_email(user_data.email, verification_code)
+                    
+                    if email_sent:
+                        self.send_response(200)
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            "message": "Verification email resent! Please check your email for the new verification code.",
+                            "user_id": existing_user["id"]
+                        }).encode())
+                    else:
+                        self.send_response(500)
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            "detail": "Failed to resend verification email. Please contact support."
+                        }).encode())
+                    return
             
             if len(user_data.password) < 6:
                 self.send_response(400)
@@ -82,6 +110,7 @@ class handler(BaseHTTPRequestHandler):
         """Send verification email via Formspree"""
         try:
             formspree_api_key = os.getenv('FORMSPREE_API_KEY')
+            print(f"DEBUG: FORMSPREE_API_KEY = {formspree_api_key}")
             if not formspree_api_key:
                 print("Warning: FORMSPREE_API_KEY not found in environment variables")
                 return False
@@ -91,18 +120,27 @@ class handler(BaseHTTPRequestHandler):
             else:
                 formspree_endpoint = f'https://formspree.io/f/{formspree_api_key}'
             
+            print(f"DEBUG: Formspree endpoint = {formspree_endpoint}")
+            
             email_data = {
                 'email': email,
                 'message': f'Your verification code is: {verification_code}'
             }
+            
+            print(f"DEBUG: Email data = {email_data}")
             
             data = urllib.parse.urlencode(email_data).encode('utf-8')
             req = urllib.request.Request(formspree_endpoint, data=data)
             req.add_header('Content-Type', 'application/x-www-form-urlencoded')
             req.add_header('Accept', 'application/json')
             
+            print(f"DEBUG: Request headers = {dict(req.headers)}")
+            print(f"DEBUG: Request data = {data}")
+            
             with urllib.request.urlopen(req) as response:
                 response_data = response.read().decode('utf-8')
+                print(f"DEBUG: Response status = {response.status}")
+                print(f"DEBUG: Response data = {response_data}")
                 if response.status == 200:
                     print(f"Verification email sent successfully to {email}")
                     return True
@@ -112,6 +150,9 @@ class handler(BaseHTTPRequestHandler):
                     
         except Exception as e:
             print(f"Error sending verification email: {str(e)}")
+            print(f"DEBUG: Exception type = {type(e)}")
+            import traceback
+            print(f"DEBUG: Traceback = {traceback.format_exc()}")
             return False
     
     def do_OPTIONS(self):
