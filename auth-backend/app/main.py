@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 import secrets
 import re
 import os
+import urllib.request
+import urllib.parse
 
 app = FastAPI(title="Email Authentication API", version="1.0.0")
 
@@ -72,6 +74,41 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def send_verification_email(email: str, verification_code: str) -> bool:
+    """Send verification email via Formspree"""
+    try:
+        formspree_api_key = os.getenv('FORMSPREE_API_KEY')
+        if not formspree_api_key:
+            print("Warning: FORMSPREE_API_KEY not found in environment variables")
+            return False
+        
+        if formspree_api_key.startswith('https://'):
+            formspree_endpoint = formspree_api_key
+        else:
+            formspree_endpoint = f'https://formspree.io/f/{formspree_api_key}'
+        
+        email_data = {
+            'email': email,
+            'message': f'Your verification code is: {verification_code}'
+        }
+        
+        data = urllib.parse.urlencode(email_data).encode('utf-8')
+        req = urllib.request.Request(formspree_endpoint, data=data)
+        req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+        req.add_header('Accept', 'application/json')
+        
+        with urllib.request.urlopen(req) as response:
+            if response.status == 200:
+                print(f"Verification email sent successfully to {email}")
+                return True
+            else:
+                print(f"Failed to send email. Status: {response.status}")
+                return False
+                
+    except Exception as e:
+        print(f"Error sending verification email: {str(e)}")
+        return False
+
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -98,10 +135,29 @@ async def healthz():
 @app.post("/api/signup", response_model=dict)
 async def signup(user_data: UserSignup):
     if user_data.email in users_db:
-        raise HTTPException(
-            status_code=400,
-            detail="User with this email already exists"
-        )
+        existing_user = users_db[user_data.email]
+        if existing_user["is_verified"]:
+            raise HTTPException(
+                status_code=400,
+                detail="User with this email already exists"
+            )
+        else:
+            verification_code = generate_verification_code()
+            users_db[user_data.email]["verification_code"] = verification_code
+            verification_codes[user_data.email] = verification_code
+            
+            email_sent = send_verification_email(user_data.email, verification_code)
+            
+            if email_sent:
+                return {
+                    "message": "Verification email resent! Please check your email for the new verification code.",
+                    "user_id": existing_user["id"]
+                }
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to resend verification email. Please contact support."
+                )
     
     if len(user_data.password) < 6:
         raise HTTPException(
@@ -124,11 +180,18 @@ async def signup(user_data: UserSignup):
     
     verification_codes[user_data.email] = verification_code
     
-    return {
-        "message": "Account created successfully! Use verification code: " + verification_code,
-        "user_id": user_id,
-        "verification_code": verification_code
-    }
+    email_sent = send_verification_email(user_data.email, verification_code)
+    
+    if email_sent:
+        return {
+            "message": "Account created successfully! Please check your email for the verification code.",
+            "user_id": user_id
+        }
+    else:
+        raise HTTPException(
+            status_code=500,
+            detail="Account created but failed to send verification email. Please contact support."
+        )
 
 @app.post("/api/verify-email", response_model=dict)
 async def verify_email(verification_data: EmailVerification):
