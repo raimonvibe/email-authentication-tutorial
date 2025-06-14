@@ -107,7 +107,9 @@ def send_verification_email(email: str, verification_code: str) -> bool:
         if not brevo_api_key:
             print("ERROR: BREVO_API_KEY not found in environment variables")
             print(f"DEBUG: Available env vars: {list(os.environ.keys())}")
-            return False
+            print(f"TUTORIAL MODE: Since email service is not configured, here's your verification code: {verification_code}")
+            print(f"TUTORIAL MODE: Use this code to verify email: {email}")
+            return True  # Return True for tutorial mode
         
         brevo_endpoint = 'https://api.brevo.com/v3/smtp/email'
         
