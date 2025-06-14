@@ -77,10 +77,26 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 def send_verification_email(email: str, verification_code: str) -> bool:
     """Send verification email via Formspree"""
     try:
-        formspree_api_key = os.getenv('FORMSPREE_API_KEY')
+        formspree_api_key = (
+            os.getenv('FORMSPREE_API_KEY') or 
+            os.environ.get('FORMSPREE_API_KEY') or
+            os.getenv('formspree_api_key') or
+            os.environ.get('formspree_api_key')
+        )
+        
         if not formspree_api_key:
             print("Warning: FORMSPREE_API_KEY not found in environment variables")
-            return False
+            try:
+                import subprocess
+                result = subprocess.run(['printenv', 'FORMSPREE_API_KEY'], capture_output=True, text=True)
+                if result.returncode == 0 and result.stdout.strip():
+                    formspree_api_key = result.stdout.strip()
+                    print(f"Found FORMSPREE_API_KEY via printenv: {formspree_api_key}")
+            except Exception as e:
+                print(f"printenv attempt failed: {e}")
+            
+            if not formspree_api_key:
+                return False
         
         if formspree_api_key.startswith('https://'):
             formspree_endpoint = formspree_api_key
