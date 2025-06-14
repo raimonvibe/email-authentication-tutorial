@@ -166,6 +166,7 @@ class handler(BaseHTTPRequestHandler):
             req = urllib.request.Request(formspree_endpoint, data=data)
             req.add_header('Content-Type', 'application/x-www-form-urlencoded')
             req.add_header('Accept', 'application/json')
+            req.add_header('User-Agent', 'Mozilla/5.0 (compatible; EmailAuthTutorial/1.0)')
             
             print(f"DEBUG: Request headers = {dict(req.headers)}")
             print(f"DEBUG: Request data = {data}")
