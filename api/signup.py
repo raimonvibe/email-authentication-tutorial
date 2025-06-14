@@ -67,7 +67,7 @@ class handler(BaseHTTPRequestHandler):
             hashed_password = hash_password(user_data.password)
             verification_code = generate_verification_code()
             
-            user_id = f"user_{len(users_db) + 1}"
+            user_id = f"user_{int(datetime.utcnow().timestamp() * 1000000)}"
             users_db[user_data.email] = {
                 "id": user_id,
                 "email": user_data.email,
@@ -91,12 +91,13 @@ class handler(BaseHTTPRequestHandler):
                     "user_id": user_id
                 }).encode())
             else:
+                print("ERROR: Email sending failed - check Formspree configuration")
                 self.send_response(500)
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({
-                    "detail": "Account created but failed to send verification email. Please contact support."
+                    "detail": "Account created but email verification failed. Please check your Formspree configuration or contact support."
                 }).encode())
             
         except Exception as e:
@@ -109,14 +110,17 @@ class handler(BaseHTTPRequestHandler):
     def send_verification_email(self, email, verification_code):
         """Send verification email via Formspree"""
         try:
-            formspree_api_key = os.getenv('FORMSPREE_API_KEY')
+            formspree_api_key = os.getenv('FORMSPREE_API_KEY') or os.environ.get('FORMSPREE_API_KEY')
             print(f"DEBUG: FORMSPREE_API_KEY = {formspree_api_key}")
             if not formspree_api_key:
-                print("Warning: FORMSPREE_API_KEY not found in environment variables")
+                print("ERROR: FORMSPREE_API_KEY not found in environment variables")
+                print(f"DEBUG: Available env vars: {list(os.environ.keys())}")
                 return False
             
             if formspree_api_key.startswith('https://'):
                 formspree_endpoint = formspree_api_key
+            elif formspree_api_key.startswith('http://'):
+                formspree_endpoint = formspree_api_key  
             else:
                 formspree_endpoint = f'https://formspree.io/f/{formspree_api_key}'
             

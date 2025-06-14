@@ -34,7 +34,25 @@ Your form endpoint will be: `https://formspree.io/f/xpzgkqyw`
    - **Value**: Your Form ID (e.g., `xpzgkqyw`) or full endpoint URL
    - **Environment**: Production, Preview, Development (select all)
 
-### 4. Deploy Changes
+### 4. Verify Environment Variable in Vercel
+
+1. In your Vercel project dashboard, go to **Settings** → **Environment Variables**
+2. Ensure `FORMSPREE_API_KEY` is set for all environments (Production, Preview, Development)
+3. The value should be either:
+   - Just the Form ID: `xpzgkqyw`
+   - Full endpoint URL: `https://formspree.io/f/xpzgkqyw`
+4. After adding/updating the variable, redeploy your application
+5. Check the function logs in Vercel dashboard to verify the variable is accessible
+
+### 5. Testing the Integration
+
+To verify the setup is working:
+1. Use the Demo tab to sign up with a real email address
+2. Check Vercel function logs for any FORMSPREE_API_KEY errors
+3. Verify you receive the verification email
+4. If emails aren't sent, check your Formspree dashboard for submission logs
+
+### 6. Deploy Changes
 
 After setting the environment variable, redeploy your application:
 - Vercel will automatically redeploy when you push changes to your connected Git repository
@@ -44,10 +62,11 @@ After setting the environment variable, redeploy your application:
 
 When a user signs up:
 
-1. The system creates a user account with a 5-digit verification code
-2. Instead of returning the code in the API response, it sends an email via Formspree
-3. The user receives an email with their verification code
-4. They can then use the "Verify" tab to enter the code and complete registration
+1. The system creates a user account with a unique timestamp-based ID and 5-digit verification code
+2. The system handles duplicate email attempts by allowing verification code resending for unverified accounts
+3. Instead of returning the code in the API response, it sends an email via Formspree
+4. The user receives an email with their verification code
+5. They can then use the "Verify" tab to enter the code and complete registration
 
 ## Email Template
 
@@ -84,6 +103,8 @@ To test the integration:
 2. Sign up with a real email address
 3. Check your email inbox for the verification code
 4. Use the Verify tab to complete the process
+5. Test duplicate email handling by trying to sign up again with the same email
+6. Verify that unverified accounts can receive new verification codes
 
 ## Support
 
