@@ -47,7 +47,7 @@ function App() {
     e.preventDefault()
     setError('')
     setMessage('')
-    
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/signup`, {
         method: 'POST',
@@ -56,13 +56,13 @@ function App() {
         },
         body: JSON.stringify(signupForm),
       })
-      
+
       const data = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(data.detail || 'Signup failed')
       }
-      
+
       setPendingEmail(signupForm.email)
       setMessage(`Account created! Verification code: ${data.verification_code}`)
       setCurrentView('verify')
@@ -75,7 +75,7 @@ function App() {
     e.preventDefault()
     setError('')
     setMessage('')
-    
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/verify-email`, {
         method: 'POST',
@@ -87,13 +87,13 @@ function App() {
           verification_code: verificationCode
         }),
       })
-      
+
       const data = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(data.detail || 'Verification failed')
       }
-      
+
       setMessage('Email verified successfully! You can now log in.')
       setCurrentView('auth')
     } catch (err) {
@@ -105,7 +105,7 @@ function App() {
     e.preventDefault()
     setError('')
     setMessage('')
-    
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/login`, {
         method: 'POST',
@@ -114,13 +114,13 @@ function App() {
         },
         body: JSON.stringify(loginForm),
       })
-      
+
       const data = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(data.detail || 'Login failed')
       }
-      
+
       setUser(data.user)
       localStorage.setItem('token', data.access_token)
       setCurrentView('dashboard')
@@ -171,7 +171,7 @@ function App() {
             </h1>
           </div>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Learn how to build complete email signup and login functionality with email verification using Formspree. 
+            Learn how to build complete email signup and login functionality with email verification using Formspree.
             Perfect for beginners who want to understand authentication from frontend to backend.
           </p>
           <div className="flex justify-center gap-3 mt-6">
@@ -401,8 +401,8 @@ function App() {
               <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-4 rounded-lg border border-purple-500/30">
                 <h4 className="text-lg font-semibold text-pink-400 mb-2">🎯 Key Learning Outcome</h4>
                 <p className="text-sm">
-                  You'll understand how the signup process creates a user account that enables the login functionality, 
-                  how email verification ensures secure account activation, and how the system handles duplicate users 
+                  You'll understand how the signup process creates a user account that enables the login functionality,
+                  how email verification ensures secure account activation, and how the system handles duplicate users
                   by allowing verification code resending for unverified accounts.
                 </p>
               </div>
@@ -433,17 +433,17 @@ function App() {
     <label for="email">Email Address</label>
     <input type="email" id="email" name="email" required>
   </div>
-  
+
   <div class="form-group">
     <label for="password">Password</label>
     <input type="password" id="password" name="password" required>
   </div>
-  
+
   <div class="form-group">
     <label for="confirmPassword">Confirm Password</label>
     <input type="password" id="confirmPassword" name="confirmPassword" required>
   </div>
-  
+
   <button type="submit" class="signup-btn">Create Account</button>
 </form>`}
                 />
@@ -475,34 +475,34 @@ function SignupForm() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\\S+@\\S+\\.\\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
-    
+
     try {
       const response = await fetch('/api/signup', {
         method: 'POST',
@@ -514,7 +514,7 @@ function SignupForm() {
           password: formData.password
         }),
       });
-      
+
       if (response.ok) {
         alert('Account created! Check your email for verification.');
       } else {
@@ -542,7 +542,7 @@ function SignupForm() {
         />
         {errors.email && <span className="error-text">{errors.email}</span>}
       </div>
-      
+
       <div className="form-group">
         <label htmlFor="password">Password</label>
         <input
@@ -555,7 +555,7 @@ function SignupForm() {
         />
         {errors.password && <span className="error-text">{errors.password}</span>}
       </div>
-      
+
       <div className="form-group">
         <label htmlFor="confirmPassword">Confirm Password</label>
         <input
@@ -568,9 +568,9 @@ function SignupForm() {
         />
         {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
       </div>
-      
+
       {errors.submit && <div className="error-text">{errors.submit}</div>}
-      
+
       <button type="submit" disabled={isLoading} className="signup-btn">
         {isLoading ? 'Creating Account...' : 'Create Account'}
       </button>
@@ -741,7 +741,7 @@ function LoginForm() {
           required
         />
       </div>
-      
+
       <div className="form-group">
         <label htmlFor="password">Password</label>
         <input
@@ -753,13 +753,13 @@ function LoginForm() {
           required
         />
       </div>
-      
+
       {errors.submit && <div className="error-text">{errors.submit}</div>}
-      
+
       <button type="submit" disabled={isLoading} className="login-btn">
         {isLoading ? 'Signing In...' : 'Sign In'}
       </button>
-      
+
       <p className="signup-link">
         Don't have an account? <a href="/signup">Sign up here</a>
       </p>
@@ -835,7 +835,7 @@ function LoginForm() {
                   id="frontend-email-service"
                   code={`async function sendVerificationEmail(email, verificationCode) {
   const formspreeEndpoint = 'https://formspree.io/f/YOUR_FORM_ID';
-  
+
   const emailData = {
     email: email,
     subject: 'Verify Your Account',
@@ -914,7 +914,7 @@ function VerificationForm({ userId }) {
     <div className="verification-container">
       <h2>Verify Your Email</h2>
       <p>We've sent a 5-digit code to your email address.</p>
-      
+
       <form onSubmit={handleSubmit} className="verification-form">
         <div className="form-group">
           <label htmlFor="code">Verification Code</label>
@@ -929,13 +929,13 @@ function VerificationForm({ userId }) {
             required
           />
         </div>
-        
+
         {message && (
           <div className={message.includes('successfully') ? 'success-text' : 'error-text'}>
             {message}
           </div>
         )}
-        
+
         <button type="submit" disabled={isLoading} className="verify-btn">
           {isLoading ? 'Verifying...' : 'Verify Email'}
         </button>
@@ -1033,10 +1033,10 @@ class handler(BaseHTTPRequestHandler):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8'))
-            
+
             email = data.get('email')
             password = data.get('password')
-            
+
             # Check if user already exists
             if email in users:
                 if users[email].get('verified', False):
@@ -1054,13 +1054,13 @@ class handler(BaseHTTPRequestHandler):
                 # Create new user
                 hashed_password = hash_password(password)
                 verification_code = generate_verification_code()
-                
+
                 users[email] = {
                     'password': hashed_password,
                     'verification_code': verification_code,
                     'verified': False
                 }
-            
+
             # Send verification email
             formspree_key = os.environ.get('FORMSPREE_KEY')
             if formspree_key:
@@ -1102,10 +1102,10 @@ class handler(BaseHTTPRequestHandler):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8'))
-            
+
             email = data.get('email')
             password = data.get('password')
-            
+
             # Check if user exists and is verified
             if email not in users:
                 self.send_response(400)
@@ -1114,7 +1114,7 @@ class handler(BaseHTTPRequestHandler):
                 response = {"error": "Invalid credentials"}
                 self.wfile.write(json.dumps(response).encode())
                 return
-            
+
             user = users[email]
             if not user.get('verified', False):
                 self.send_response(400)
@@ -1123,7 +1123,7 @@ class handler(BaseHTTPRequestHandler):
                 response = {"error": "Please verify your email first"}
                 self.wfile.write(json.dumps(response).encode())
                 return
-            
+
             # Verify password
             if not verify_password(password, user['password']):
                 self.send_response(400)
@@ -1132,10 +1132,10 @@ class handler(BaseHTTPRequestHandler):
                 response = {"error": "Invalid credentials"}
                 self.wfile.write(json.dumps(response).encode())
                 return
-            
+
             # Create access token
             access_token = create_access_token({"sub": email})
-            
+
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -1164,10 +1164,10 @@ class handler(BaseHTTPRequestHandler):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8'))
-            
+
             email = data.get('email')
             verification_code = data.get('verification_code')
-            
+
             # Check if user exists
             if email not in users:
                 self.send_response(400)
@@ -1176,9 +1176,9 @@ class handler(BaseHTTPRequestHandler):
                 response = {"error": "User not found"}
                 self.wfile.write(json.dumps(response).encode())
                 return
-            
+
             user = users[email]
-            
+
             # Check verification code
             if user.get('verification_code') != verification_code:
                 self.send_response(400)
@@ -1187,11 +1187,11 @@ class handler(BaseHTTPRequestHandler):
                 response = {"error": "Invalid verification code"}
                 self.wfile.write(json.dumps(response).encode())
                 return
-            
+
             # Mark user as verified
             users[email]['verified'] = True
             users[email]['verification_code'] = None
-            
+
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -1323,7 +1323,7 @@ class handler(BaseHTTPRequestHandler):
                   </CardHeader>
                   <CardContent className="text-center space-y-4">
                     <p className="text-purple-100">
-                      You've learned how to create signup forms, implement login functionality, 
+                      You've learned how to create signup forms, implement login functionality,
                       integrate email verification, and build secure backend authentication logic.
                     </p>
                     <div className="flex justify-center gap-4 flex-wrap">
@@ -1343,8 +1343,8 @@ class handler(BaseHTTPRequestHandler):
                       </ul>
                     </div>
                     <div className="mt-6">
-                      <Button 
-                        onClick={() => setCurrentView('auth')} 
+                      <Button
+                        onClick={() => setCurrentView('auth')}
                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                       >
                         Try the Live Demo →
@@ -1553,13 +1553,13 @@ class handler(BaseHTTPRequestHandler):
           </Tabs>
         </div>
 
-        
+
         <footer className="mt-12 sm:mt-16 bg-black/30 backdrop-blur-sm rounded-xl border border-purple-500/20 p-6 sm:p-8">
           <div className="text-center">
             <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">Connect with Raimon</h3>
             <ul className="flex flex-wrap justify-center gap-3 sm:gap-4 icons social-grid">
               <li>
-                <a href="https://x.com/raimonvibe/" target="_blank" rel="noopener noreferrer" 
+                <a href="https://x.com/raimonvibe/" target="_blank" rel="noopener noreferrer"
                    className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white hover:from-blue-600 hover:to-purple-700 transition-all duration-300 hover:scale-110">
                   <i className="fab fa-x-twitter text-base sm:text-lg"></i>
                   <span className="sr-only">X</span>
