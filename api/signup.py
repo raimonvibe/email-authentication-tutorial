@@ -1,9 +1,6 @@
-from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from .shared import users_db, verification_codes, hash_password, generate_verification_code
-
-app = FastAPI()
 
 class UserSignup(BaseModel):
     email: EmailStr

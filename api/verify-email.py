@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from pydantic import BaseModel, EmailStr
 from .shared import users_db, verification_codes
 
