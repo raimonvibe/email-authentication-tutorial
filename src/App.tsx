@@ -141,22 +141,48 @@ function App() {
     setError('')
   }
 
+  const getLanguageAccentColor = (language: string) => {
+    if (language.toLowerCase().includes('html')) return 'from-green-600 to-green-700'
+    if (language.toLowerCase().includes('react') || language.toLowerCase().includes('tsx') || language.toLowerCase().includes('typescript')) return 'from-blue-600 to-blue-700'
+    if (language.toLowerCase().includes('css')) return 'from-pink-600 to-pink-700'
+    if (language.toLowerCase().includes('python') || language.toLowerCase().includes('py')) return 'from-orange-600 to-orange-700'
+    if (language.toLowerCase().includes('javascript') || language.toLowerCase().includes('js')) return 'from-yellow-600 to-yellow-700'
+    return 'from-purple-600 to-purple-700'
+  }
+
   const CodeBlock = ({ code, language, id }: { code: string; language: string; id: string }) => (
-    <div className="relative bg-gray-800 rounded-lg p-4 my-4 overflow-x-auto">
-      <div className="flex justify-between items-center mb-2">
-        <Badge variant="secondary" className="bg-purple-600 text-white">{language}</Badge>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => copyToClipboard(code, id)}
-          className="text-gray-300 hover:text-white"
-        >
-          {copiedCode === id ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-        </Button>
+    <div className="relative bg-gray-900 rounded-xl p-6 my-8 overflow-hidden border-2 border-gray-600 shadow-2xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-850 to-gray-900 rounded-xl"></div>
+      <div className="relative z-10">
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-600">
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant="secondary" 
+              className={`bg-gradient-to-r ${getLanguageAccentColor(language)} text-white px-3 py-1 text-sm font-medium shadow-lg`}
+            >
+              {language}
+            </Badge>
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 bg-red-500 rounded-full shadow-sm"></div>
+              <div className="w-3 h-3 bg-yellow-500 rounded-full shadow-sm"></div>
+              <div className="w-3 h-3 bg-green-500 rounded-full shadow-sm"></div>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => copyToClipboard(code, id)}
+            className="text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 rounded-lg px-3 py-2"
+          >
+            {copiedCode === id ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          </Button>
+        </div>
+        <div className="bg-black/30 rounded-lg p-4 overflow-x-auto">
+          <pre className="text-sm text-gray-100 leading-relaxed">
+            <code>{code}</code>
+          </pre>
+        </div>
       </div>
-      <pre className="text-sm text-gray-100 overflow-x-auto">
-        <code>{code}</code>
-      </pre>
     </div>
   )
 
@@ -422,9 +448,13 @@ function App() {
                 Create a beautiful signup form that collects user information and handles validation
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="text-lg font-semibold text-green-400 mb-3">HTML Structure</h4>
+            <CardContent className="space-y-8">
+              <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 p-6 rounded-xl border border-green-700/30">
+                <h4 className="text-lg font-semibold text-green-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  HTML Structure
+                </h4>
+                <p className="text-gray-300 text-sm mb-4">Basic HTML form structure for user signup:</p>
                 <CodeBlock
                   language="HTML"
                   id="signup-html"
@@ -449,9 +479,12 @@ function App() {
                 />
               </div>
 
-              <div>
-                <h4 className="text-lg font-semibold text-green-400 mb-3">Frontend Signup Form</h4>
-                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/SignupForm.tsx</code>:</p>
+              <div className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 p-6 rounded-xl border border-blue-700/30">
+                <h4 className="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  React Component Implementation
+                </h4>
+                <p className="text-gray-300 text-sm mb-4">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/SignupForm.tsx</code> with full validation logic:</p>
                 <CodeBlock
                   language="src/components/SignupForm.tsx"
                   id="signup-react"
@@ -580,8 +613,12 @@ function SignupForm() {
                 />
               </div>
 
-              <div>
-                <h4 className="text-lg font-semibold text-green-400 mb-3">CSS Styling</h4>
+              <div className="bg-gradient-to-r from-pink-900/20 to-rose-900/20 p-6 rounded-xl border border-pink-700/30">
+                <h4 className="text-lg font-semibold text-pink-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+                  CSS Styling
+                </h4>
+                <p className="text-gray-300 text-sm mb-4">Complete CSS styles for the signup form with modern design:</p>
                 <CodeBlock
                   language="CSS"
                   id="signup-css"
@@ -674,10 +711,13 @@ function SignupForm() {
                 Build the login form that authenticates users after they've completed signup
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="text-lg font-semibold text-blue-400 mb-3">Frontend Login Form</h4>
-                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/LoginForm.tsx</code>:</p>
+            <CardContent className="space-y-8">
+              <div className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 p-6 rounded-xl border border-blue-700/30">
+                <h4 className="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  React Login Component
+                </h4>
+                <p className="text-gray-300 text-sm mb-4">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/LoginForm.tsx</code> with authentication logic:</p>
                 <CodeBlock
                   language="src/components/LoginForm.tsx"
                   id="login-react"
@@ -797,9 +837,12 @@ function LoginForm() {
                 Set up email verification using Formspree to send 5-digit confirmation codes
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="text-lg font-semibold text-pink-400 mb-3">Formspree Setup</h4>
+            <CardContent className="space-y-8">
+              <div className="bg-gradient-to-r from-pink-900/20 to-purple-900/20 p-6 rounded-xl border border-pink-700/30">
+                <h4 className="text-lg font-semibold text-pink-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+                  Formspree Setup Guide
+                </h4>
                 <div className="bg-gray-700 p-4 rounded-lg">
                   <ol className="text-sm text-gray-300 space-y-2">
                     <li>1. Go to <a href="https://formspree.io" className="text-pink-400 hover:underline">formspree.io</a> and create an account</li>
@@ -810,8 +853,11 @@ function LoginForm() {
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-lg font-semibold text-pink-400 mb-3">Integration Overview</h4>
+              <div className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 p-6 rounded-xl border border-purple-700/30">
+                <h4 className="text-lg font-semibold text-purple-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                  Integration Overview
+                </h4>
                 <p className="text-gray-400 text-sm mb-3">This section covers frontend email handling. The backend email sending function will be created in the <strong>Backend Logic & Authentication</strong> section below as part of the complete <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> file.</p>
                 <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -827,9 +873,12 @@ function LoginForm() {
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-lg font-semibold text-pink-400 mb-3">Frontend: Email Verification Helper</h4>
-                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">src/utils/emailService.js</code> for frontend email handling:</p>
+              <div className="bg-gradient-to-r from-yellow-900/20 to-amber-900/20 p-6 rounded-xl border border-yellow-700/30">
+                <h4 className="text-lg font-semibold text-yellow-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  Frontend Email Service
+                </h4>
+                <p className="text-gray-300 text-sm mb-4">Create <code className="bg-gray-800 px-2 py-1 rounded">src/utils/emailService.js</code> for frontend email handling:</p>
                 <CodeBlock
                   language="src/utils/emailService.js"
                   id="frontend-email-service"
@@ -864,9 +913,12 @@ export { sendVerificationEmail };`}
                 />
               </div>
 
-              <div>
-                <h4 className="text-lg font-semibold text-pink-400 mb-3">Frontend: Email Verification Form</h4>
-                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/VerificationForm.tsx</code>:</p>
+              <div className="bg-gradient-to-r from-cyan-900/20 to-teal-900/20 p-6 rounded-xl border border-cyan-700/30">
+                <h4 className="text-lg font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                  Email Verification Form Component
+                </h4>
+                <p className="text-gray-300 text-sm mb-4">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/VerificationForm.tsx</code> for code verification:</p>
                 <CodeBlock
                   language="src/components/VerificationForm.tsx"
                   id="verification-form"
@@ -958,10 +1010,13 @@ function VerificationForm({ userId }) {
                 Complete backend implementation with password hashing, JWT tokens, and user management
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="text-lg font-semibold text-orange-400 mb-3">Backend Setup (Vercel Serverless)</h4>
-                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> for shared utilities:</p>
+            <CardContent className="space-y-8">
+              <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 p-6 rounded-xl border border-orange-700/30">
+                <h4 className="text-lg font-semibold text-orange-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                  Backend Shared Utilities
+                </h4>
+                <p className="text-gray-300 text-sm mb-4">Create <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> for shared utilities and authentication functions:</p>
                 <CodeBlock
                   language="api/shared.py"
                   id="server-setup"
@@ -1015,9 +1070,12 @@ def send_verification_email(email: str, code: str, formspree_key: str) -> bool:
                 />
               </div>
 
-              <div>
-                <h4 className="text-lg font-semibold text-orange-400 mb-3">Login Endpoint</h4>
-                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">api/login.py</code>:</p>
+              <div className="bg-gradient-to-r from-red-900/20 to-pink-900/20 p-6 rounded-xl border border-red-700/30">
+                <h4 className="text-lg font-semibold text-red-400 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                  Login API Endpoint
+                </h4>
+                <p className="text-gray-300 text-sm mb-4">Create <code className="bg-gray-800 px-2 py-1 rounded">api/login.py</code> for user authentication:</p>
                 <CodeBlock
                   language="api/login.py"
                   id="login-endpoint"
