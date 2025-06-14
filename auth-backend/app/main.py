@@ -75,66 +75,66 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 def send_verification_email(email: str, verification_code: str) -> bool:
-    """Send verification email via SendGrid"""
+    """Send verification email via Brevo (formerly SendInBlue)"""
     try:
-        sendgrid_api_key = None
+        brevo_api_key = None
         
-        sendgrid_api_key = (
-            os.getenv('SENDGRID_API_KEY') or 
-            os.environ.get('SENDGRID_API_KEY') or
-            os.getenv('sendgrid_api_key') or
-            os.environ.get('sendgrid_api_key')
+        brevo_api_key = (
+            os.getenv('BREVO_API_KEY') or 
+            os.environ.get('BREVO_API_KEY') or
+            os.getenv('brevo_api_key') or
+            os.environ.get('brevo_api_key')
         )
-        print(f"DEBUG: Method 1 - SENDGRID_API_KEY = {sendgrid_api_key}")
+        print(f"DEBUG: Method 1 - BREVO_API_KEY = {brevo_api_key}")
         
-        if not sendgrid_api_key:
-            for key_name in ['SENDGRID_API_KEY', 'sendgrid_api_key', 'SendGrid_Api_Key']:
-                sendgrid_api_key = os.environ.get(key_name)
-                if sendgrid_api_key:
-                    print(f"DEBUG: Method 2 - Found {key_name} = {sendgrid_api_key}")
+        if not brevo_api_key:
+            for key_name in ['BREVO_API_KEY', 'brevo_api_key', 'Brevo_Api_Key']:
+                brevo_api_key = os.environ.get(key_name)
+                if brevo_api_key:
+                    print(f"DEBUG: Method 2 - Found {key_name} = {brevo_api_key}")
                     break
         
-        if not sendgrid_api_key:
+        if not brevo_api_key:
             try:
                 import subprocess
-                result = subprocess.run(['printenv', 'SENDGRID_API_KEY'], capture_output=True, text=True)
+                result = subprocess.run(['printenv', 'BREVO_API_KEY'], capture_output=True, text=True)
                 if result.returncode == 0 and result.stdout.strip():
-                    sendgrid_api_key = result.stdout.strip()
-                    print(f"DEBUG: Method 3 - Found SENDGRID_API_KEY via printenv: {sendgrid_api_key}")
+                    brevo_api_key = result.stdout.strip()
+                    print(f"DEBUG: Method 3 - Found BREVO_API_KEY via printenv: {brevo_api_key}")
             except Exception as e:
                 print(f"DEBUG: Method 3 - printenv attempt failed: {e}")
         
-        if not sendgrid_api_key:
-            print("ERROR: SENDGRID_API_KEY not found in environment variables")
+        if not brevo_api_key:
+            print("ERROR: BREVO_API_KEY not found in environment variables")
             print(f"DEBUG: Available env vars: {list(os.environ.keys())}")
             return False
         
-        sendgrid_endpoint = 'https://api.sendgrid.com/v3/mail/send'
+        brevo_endpoint = 'https://api.brevo.com/v3/smtp/email'
         
         email_payload = {
-            "personalizations": [
+            "sender": {
+                "email": "noreply@email-auth-tutorial.com",
+                "name": "Email Auth Tutorial"
+            },
+            "to": [
                 {
-                    "to": [{"email": email}],
-                    "subject": "Email Verification Code"
+                    "email": email,
+                    "name": "User"
                 }
             ],
-            "from": {"email": "noreply@email-auth-tutorial.com", "name": "Email Auth Tutorial"},
-            "content": [
-                {
-                    "type": "text/plain",
-                    "value": f"Your verification code is: {verification_code}\n\nPlease enter this code to verify your email address."
-                }
-            ]
+            "subject": "Email Verification Code",
+            "htmlContent": f"<html><body><p>Your verification code is: <strong>{verification_code}</strong></p><p>Please enter this code to verify your email address.</p></body></html>"
         }
         
-        print(f"DEBUG: SendGrid endpoint = {sendgrid_endpoint}")
+        print(f"DEBUG: Brevo endpoint = {brevo_endpoint}")
         print(f"DEBUG: Email payload = {email_payload}")
         
         import json
         data = json.dumps(email_payload).encode('utf-8')
-        req = urllib.request.Request(sendgrid_endpoint, data=data, method='POST')
+        req = urllib.request.Request(brevo_endpoint, data=data, method='POST')
         req.add_header('Content-Type', 'application/json')
-        req.add_header('Authorization', f'Bearer {sendgrid_api_key}')
+        req.add_header('api-key', brevo_api_key)
+        req.add_header('accept', 'application/json')
         req.add_header('User-Agent', 'Mozilla/5.0 (compatible; EmailAuthTutorial/1.0)')
         
         print(f"DEBUG: Request headers = {dict(req.headers)}")
@@ -143,7 +143,7 @@ def send_verification_email(email: str, verification_code: str) -> bool:
             response_data = response.read().decode('utf-8')
             print(f"DEBUG: Response status = {response.status}")
             print(f"DEBUG: Response data = {response_data}")
-            if response.status == 202:  # SendGrid returns 202 for successful email queuing
+            if response.status == 201:  # Brevo returns 201 for successful email sending
                 print(f"Verification email sent successfully to {email}")
                 return True
             else:
