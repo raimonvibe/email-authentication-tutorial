@@ -241,37 +241,34 @@ function App() {
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="text-white font-medium text-lg">Step 3: Create Backend (FastAPI)</h4>
+                      <h4 className="text-white font-medium text-lg">Step 3: Create Backend (Vercel Serverless)</h4>
                       <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                        <p className="text-gray-300 text-sm mb-3">Set up the Python backend:</p>
+                        <p className="text-gray-300 text-sm mb-3">Set up the Python serverless functions:</p>
                         <div className="bg-black p-3 rounded border mb-3">
                           <code className="text-green-400 text-sm">
-                            mkdir auth-backend<br/>
-                            cd auth-backend<br/>
-                            pip install fastapi uvicorn python-jose bcrypt python-multipart email-validator
+                            mkdir api<br/>
+                            pip install pydantic bcrypt python-jose
                           </code>
                         </div>
-                        <p className="text-gray-300 text-sm mb-2">Create the file structure:</p>
+                        <p className="text-gray-300 text-sm mb-2">Create the serverless function structure:</p>
                         <div className="bg-black p-3 rounded border">
                           <code className="text-gray-400 text-sm">
-                            auth-backend/<br/>
-                            ├── app/<br/>
-                            │   └── main.py<br/>
-                            └── requirements.txt
+                            api/<br/>
+                            ├── signup.py<br/>
+                            ├── verify-email.py<br/>
+                            ├── login.py<br/>
+                            └── shared.py
                           </code>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="text-white font-medium text-lg">Step 4: Create Frontend (React)</h4>
+                      <h4 className="text-white font-medium text-lg">Step 4: Set up Frontend Dependencies</h4>
                       <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                        <p className="text-gray-300 text-sm mb-3">Set up the React frontend:</p>
+                        <p className="text-gray-300 text-sm mb-3">Install the required React dependencies:</p>
                         <div className="bg-black p-3 rounded border mb-3">
                           <code className="text-green-400 text-sm">
-                            cd ..<br/>
-                            npm create vite@latest auth-frontend -- --template react-ts<br/>
-                            cd auth-frontend<br/>
                             npm install<br/>
                             npm install @radix-ui/react-tabs @radix-ui/react-label lucide-react
                           </code>
@@ -280,15 +277,16 @@ function App() {
                         <div className="bg-black p-3 rounded border">
                           <code className="text-gray-400 text-sm">
                             email-auth-tutorial/<br/>
-                            ├── auth-backend/<br/>
-                            │   ├── app/<br/>
-                            │   │   └── main.py<br/>
-                            │   └── requirements.txt<br/>
-                            └── auth-frontend/<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;├── src/<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;│   ├── App.tsx<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;│   └── components/<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;└── package.json
+                            ├── api/<br/>
+                            │   ├── signup.py<br/>
+                            │   ├── verify-email.py<br/>
+                            │   ├── login.py<br/>
+                            │   └── shared.py<br/>
+                            ├── src/<br/>
+                            │   ├── App.tsx<br/>
+                            │   └── components/<br/>
+                            ├── vercel.json<br/>
+                            └── package.json
                           </code>
                         </div>
                       </div>
@@ -297,37 +295,63 @@ function App() {
                     <div className="space-y-4">
                       <h4 className="text-white font-medium text-lg">Step 5: Copy Backend Code</h4>
                       <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                        <p className="text-gray-300 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">auth-backend/app/main.py</code> and copy the FastAPI code from Section 1 below.</p>
+                        <p className="text-gray-300 text-sm mb-3">Create the Vercel serverless functions in the <code className="bg-gray-800 px-2 py-1 rounded">api/</code> directory. Copy the Python code from the sections below to create <code className="bg-gray-800 px-2 py-1 rounded">api/signup.py</code>, <code className="bg-gray-800 px-2 py-1 rounded">api/verify-email.py</code>, and <code className="bg-gray-800 px-2 py-1 rounded">api/login.py</code>.</p>
                       </div>
                     </div>
 
                     <div className="space-y-4">
                       <h4 className="text-white font-medium text-lg">Step 6: Copy Frontend Code</h4>
                       <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                        <p className="text-gray-300 text-sm mb-3">Replace <code className="bg-gray-800 px-2 py-1 rounded">auth-frontend/src/App.tsx</code> with the React code from Section 2 below.</p>
+                        <p className="text-gray-300 text-sm mb-3">Replace <code className="bg-gray-800 px-2 py-1 rounded">src/App.tsx</code> with the React code from the sections below, or create separate component files as shown in the code examples.</p>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="text-white font-medium text-lg">Step 7: Run Your Application</h4>
+                      <h4 className="text-white font-medium text-lg">Step 5: Set up Environment Variables</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Configure Formspree for email verification:</p>
+                        <ol className="list-decimal list-inside space-y-2 text-sm text-gray-400">
+                          <li>Create a free account at <span className="text-blue-400">https://formspree.io</span></li>
+                          <li>Create a new form and copy the Form ID</li>
+                          <li>In Vercel dashboard, add environment variable: <code className="bg-gray-800 px-2 py-1 rounded">FORMSPREE_API_KEY</code></li>
+                          <li>The system handles duplicate users by allowing verification code resending for unverified accounts</li>
+                        </ol>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 6: Copy Serverless Functions</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Create the Vercel serverless functions in the <code className="bg-gray-800 px-2 py-1 rounded">api/</code> directory. Copy the Python code from the sections below to create <code className="bg-gray-800 px-2 py-1 rounded">api/signup.py</code>, <code className="bg-gray-800 px-2 py-1 rounded">api/verify-email.py</code>, and <code className="bg-gray-800 px-2 py-1 rounded">api/login.py</code>.</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 7: Copy Frontend Code</h4>
+                      <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p className="text-gray-300 text-sm mb-3">Replace <code className="bg-gray-800 px-2 py-1 rounded">src/App.tsx</code> with the React code from the sections below, or create separate component files as shown in the code examples.</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-white font-medium text-lg">Step 8: Run Your Application</h4>
                       <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
                         <p className="text-gray-300 text-sm mb-3">Start both servers:</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-4">
                           <div>
-                            <p className="text-sm font-medium text-white mb-2">Backend (Terminal 1):</p>
+                            <p className="text-sm font-medium text-white mb-2">Development Server:</p>
                             <div className="bg-black p-3 rounded border">
                               <code className="text-green-400 text-sm">
-                                cd auth-backend<br/>
-                                uvicorn app.main:app --reload
+                                npm run dev
                               </code>
                             </div>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-white mb-2">Frontend (Terminal 2):</p>
+                            <p className="text-sm font-medium text-white mb-2">For Production (Vercel):</p>
                             <div className="bg-black p-3 rounded border">
                               <code className="text-green-400 text-sm">
-                                cd auth-frontend<br/>
-                                npm run dev
+                                npm run build<br/>
+                                vercel --prod
                               </code>
                             </div>
                           </div>
@@ -335,7 +359,7 @@ function App() {
                         <div className="mt-4 bg-green-900/20 border border-green-700 rounded p-3">
                           <p className="text-green-300 text-sm">
                             ✅ Your app will be available at <code className="bg-green-800 px-2 py-1 rounded">http://localhost:5173</code><br/>
-                            ✅ Backend API at <code className="bg-green-800 px-2 py-1 rounded">http://localhost:8000</code>
+                            ✅ Serverless API functions will be available at <code className="bg-green-800 px-2 py-1 rounded">http://localhost:5173/api/*</code>
                           </p>
                         </div>
                       </div>
@@ -378,7 +402,8 @@ function App() {
                 <h4 className="text-lg font-semibold text-pink-400 mb-2">🎯 Key Learning Outcome</h4>
                 <p className="text-sm">
                   You'll understand how the signup process creates a user account that enables the login functionality, 
-                  and how email verification ensures secure account activation.
+                  how email verification ensures secure account activation, and how the system handles duplicate users 
+                  by allowing verification code resending for unverified accounts.
                 </p>
               </div>
             </CardContent>
@@ -425,9 +450,10 @@ function App() {
               </div>
 
               <div>
-                <h4 className="text-lg font-semibold text-green-400 mb-3">React Component</h4>
+                <h4 className="text-lg font-semibold text-green-400 mb-3">Frontend Signup Form</h4>
+                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/SignupForm.tsx</code>:</p>
                 <CodeBlock
-                  language="React"
+                  language="src/components/SignupForm.tsx"
                   id="signup-react"
                   code={`import { useState } from 'react';
 
@@ -650,9 +676,10 @@ function SignupForm() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h4 className="text-lg font-semibold text-blue-400 mb-3">React Login Component</h4>
+                <h4 className="text-lg font-semibold text-blue-400 mb-3">Frontend Login Form</h4>
+                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/LoginForm.tsx</code>:</p>
                 <CodeBlock
-                  language="React"
+                  language="src/components/LoginForm.tsx"
                   id="login-react"
                   code={`import { useState } from 'react';
 
@@ -785,12 +812,35 @@ function LoginForm() {
 
               <div>
                 <h4 className="text-lg font-semibold text-pink-400 mb-3">Backend: Generate Verification Code</h4>
+                <p className="text-gray-400 text-sm mb-3">Add to <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code>:</p>
                 <CodeBlock
-                  language="JavaScript"
+                  language="api/shared.py"
                   id="verification-backend"
-                  code={`// Generate 5-digit verification code
-function generateVerificationCode() {
-  return Math.floor(10000 + Math.random() * 90000).toString();
+                  code={`import random
+import string
+
+def generate_verification_code() -> str:
+    """Generate a 5-digit verification code"""
+    return ''.join(random.choices(string.digits, k=5))
+
+def send_verification_email(email: str, code: str, formspree_key: str) -> bool:
+    """Send verification email via Formspree API"""
+    import requests
+    
+    try:
+        response = requests.post(
+            f"https://formspree.io/f/{formspree_key}",
+            json={
+                "email": email,
+                "subject": "Email Verification Code",
+                "message": f"Your verification code is: {code}"
+            },
+            headers={"Content-Type": "application/json"}
+        )
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+        return False
 }
 
 async function sendVerificationEmail(email, verificationCode) {
@@ -862,9 +912,10 @@ app.post('/api/signup', async (req, res) => {
               </div>
 
               <div>
-                <h4 className="text-lg font-semibold text-pink-400 mb-3">Frontend: Verification Form</h4>
+                <h4 className="text-lg font-semibold text-pink-400 mb-3">Frontend: Email Verification Form</h4>
+                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">src/components/VerificationForm.tsx</code>:</p>
                 <CodeBlock
-                  language="React"
+                  language="src/components/VerificationForm.tsx"
                   id="verification-form"
                   code={`import { useState } from 'react';
 
@@ -956,13 +1007,39 @@ function VerificationForm({ userId }) {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h4 className="text-lg font-semibold text-orange-400 mb-3">Server Setup (Node.js + Express)</h4>
+                <h4 className="text-lg font-semibold text-orange-400 mb-3">Backend Setup (Vercel Serverless)</h4>
+                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> for shared utilities:</p>
                 <CodeBlock
-                  language="JavaScript"
+                  language="api/shared.py"
                   id="server-setup"
-                  code={`const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+                  code={`import bcrypt
+import jwt
+from datetime import datetime, timedelta
+import random
+import string
+
+# Shared utilities for all serverless functions
+SECRET_KEY = "your-secret-key-here"
+ALGORITHM = "HS256"
+
+# In-memory storage (use database in production)
+users = {}
+verification_codes = {}
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
+def generate_verification_code() -> str:
+    return ''.join(random.choices(string.digits, k=5))
+
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(hours=24)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 const mongoose = require('mongoose');
 const cors = require('cors');
 
@@ -1009,12 +1086,67 @@ const authenticateToken = (req, res, next) => {
 
               <div>
                 <h4 className="text-lg font-semibold text-orange-400 mb-3">Login Endpoint</h4>
+                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">api/login.py</code>:</p>
                 <CodeBlock
-                  language="JavaScript"
+                  language="api/login.py"
                   id="login-endpoint"
-                  code={`// Login endpoint
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
+                  code={`from http.server import BaseHTTPRequestHandler
+import json
+from .shared import users, verify_password, create_access_token
+
+class handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        if self.path == '/api/login':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            email = data.get('email')
+            password = data.get('password')
+            
+            # Check if user exists and is verified
+            if email not in users:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = {"error": "Invalid credentials"}
+                self.wfile.write(json.dumps(response).encode())
+                return
+            
+            user = users[email]
+            if not user.get('verified', False):
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = {"error": "Please verify your email first"}
+                self.wfile.write(json.dumps(response).encode())
+                return
+            
+            # Verify password
+            if not verify_password(password, user['password']):
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = {"error": "Invalid credentials"}
+                self.wfile.write(json.dumps(response).encode())
+                return
+            
+            # Create access token
+            access_token = create_access_token({"sub": email})
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = {
+                "access_token": access_token,
+                "token_type": "bearer",
+                "user": {
+                    "id": user['id'],
+                    "email": email,
+                    "created_at": user['created_at']
+                }
+            }
+            self.wfile.write(json.dumps(response).encode())
 
   try {
     const user = await User.findOne({ email });
