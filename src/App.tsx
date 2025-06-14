@@ -811,39 +811,29 @@ function LoginForm() {
               </div>
 
               <div>
-                <h4 className="text-lg font-semibold text-pink-400 mb-3">Backend: Generate Verification Code</h4>
-                <p className="text-gray-400 text-sm mb-3">Add to <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code>:</p>
+                <h4 className="text-lg font-semibold text-pink-400 mb-3">Backend: Email Sending Integration</h4>
+                <p className="text-gray-400 text-sm mb-3">The email sending function will be included in the complete <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> file in the <strong>Backend Logic & Authentication</strong> section below. This integration allows your serverless functions to send verification emails via Formspree.</p>
+                <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                    <span className="text-blue-300 font-medium">Integration Overview</span>
+                  </div>
+                  <ul className="text-sm text-gray-300 space-y-1">
+                    <li>• Email sending function will be part of the shared utilities</li>
+                    <li>• Uses Formspree API for reliable email delivery</li>
+                    <li>• Integrated with user signup and verification flow</li>
+                    <li>• Environment variables configured in Vercel dashboard</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-pink-400 mb-3">Frontend: Email Verification Helper</h4>
+                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">src/utils/emailService.js</code> for frontend email handling:</p>
                 <CodeBlock
-                  language="api/shared.py"
-                  id="verification-backend"
-                  code={`import random
-import string
-
-def generate_verification_code() -> str:
-    """Generate a 5-digit verification code"""
-    return ''.join(random.choices(string.digits, k=5))
-
-def send_verification_email(email: str, code: str, formspree_key: str) -> bool:
-    """Send verification email via Formspree API"""
-    import requests
-    
-    try:
-        response = requests.post(
-            f"https://formspree.io/f/{formspree_key}",
-            json={
-                "email": email,
-                "subject": "Email Verification Code",
-                "message": f"Your verification code is: {code}"
-            },
-            headers={"Content-Type": "application/json"}
-        )
-        return response.status_code == 200
-    except Exception as e:
-        print(f"Email sending failed: {e}")
-        return False
-}
-
-async function sendVerificationEmail(email, verificationCode) {
+                  language="src/utils/emailService.js"
+                  id="frontend-email-service"
+                  code={`async function sendVerificationEmail(email, verificationCode) {
   const formspreeEndpoint = 'https://formspree.io/f/YOUR_FORM_ID';
   
   const emailData = {
@@ -870,44 +860,7 @@ async function sendVerificationEmail(email, verificationCode) {
   }
 }
 
-app.post('/api/signup', async (req, res) => {
-  const { email, password } = req.body;
-  
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-    
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const verificationCode = generateVerificationCode();
-    
-    const user = new User({
-      email,
-      password: hashedPassword,
-      verificationCode,
-      isVerified: false,
-      createdAt: new Date()
-    });
-    
-    await user.save();
-    
-    const emailSent = await sendVerificationEmail(email, verificationCode);
-    
-    if (emailSent) {
-      res.status(201).json({ 
-        message: 'Account created! Check your email for verification code.',
-        userId: user._id 
-      });
-    } else {
-      res.status(500).json({ message: 'Account created but failed to send verification email' });
-    }
-    
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});`}
+export { sendVerificationEmail };`}
                 />
               </div>
 
@@ -1017,6 +970,7 @@ import jwt
 from datetime import datetime, timedelta
 import random
 import string
+import requests
 
 # Shared utilities for all serverless functions
 SECRET_KEY = "your-secret-key-here"
@@ -1040,47 +994,95 @@ def create_access_token(data: dict) -> str:
     expire = datetime.utcnow() + timedelta(hours=24)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-const mongoose = require('mongoose');
-const cors = require('cors');
 
-const app = express();
+def send_verification_email(email: str, code: str, formspree_key: str) -> bool:
+    """Send verification email via Formspree API"""
+    try:
+        response = requests.post(
+            f"https://formspree.io/f/{formspree_key}",
+            json={
+                "email": email,
+                "subject": "Email Verification Code",
+                "message": f"Your verification code is: {code}"
+            },
+            headers={"Content-Type": "application/json"}
+        )
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+        return False`}
+                />
+              </div>
 
-app.use(cors());
-app.use(express.json());
 
-mongoose.connect('mongodb://localhost:27017/auth-tutorial', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
 
-const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  verificationCode: { type: String },
-  isVerified: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
-});
+              <div>
+                <h4 className="text-lg font-semibold text-orange-400 mb-3">Signup Endpoint</h4>
+                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">api/signup.py</code>:</p>
+                <CodeBlock
+                  language="api/signup.py"
+                  id="signup-endpoint"
+                  code={`from http.server import BaseHTTPRequestHandler
+import json
+import os
+from .shared import users, hash_password, generate_verification_code, send_verification_email
 
-const User = mongoose.model('User', userSchema);
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'Access token required' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid token' });
-    }
-    req.user = user;
-    next();
-  });
-};`}
+class handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        if self.path == '/api/signup':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            email = data.get('email')
+            password = data.get('password')
+            
+            # Check if user already exists
+            if email in users:
+                if users[email].get('verified', False):
+                    self.send_response(400)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    response = {"error": "User already exists"}
+                    self.wfile.write(json.dumps(response).encode())
+                    return
+                else:
+                    # User exists but not verified, allow resending verification
+                    verification_code = generate_verification_code()
+                    users[email]['verification_code'] = verification_code
+            else:
+                # Create new user
+                hashed_password = hash_password(password)
+                verification_code = generate_verification_code()
+                
+                users[email] = {
+                    'password': hashed_password,
+                    'verification_code': verification_code,
+                    'verified': False
+                }
+            
+            # Send verification email
+            formspree_key = os.environ.get('FORMSPREE_KEY')
+            if formspree_key:
+                email_sent = send_verification_email(email, verification_code, formspree_key)
+                if email_sent:
+                    self.send_response(201)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    response = {"message": "Account created! Check your email for verification code."}
+                    self.wfile.write(json.dumps(response).encode())
+                else:
+                    self.send_response(500)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    response = {"error": "Failed to send verification email"}
+                    self.wfile.write(json.dumps(response).encode())
+            else:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = {"error": "Email service not configured"}
+                self.wfile.write(json.dumps(response).encode())`}
                 />
               </div>
 
@@ -1138,99 +1140,63 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             response = {
+                "message": "Login successful",
                 "access_token": access_token,
-                "token_type": "bearer",
-                "user": {
-                    "id": user['id'],
-                    "email": email,
-                    "created_at": user['created_at']
-                }
+                "user": {"email": email}
             }
-            self.wfile.write(json.dumps(response).encode())
+            self.wfile.write(json.dumps(response).encode())`}
+                />
+              </div>
 
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
+              <div>
+                <h4 className="text-lg font-semibold text-orange-400 mb-3">Email Verification Endpoint</h4>
+                <p className="text-gray-400 text-sm mb-3">Create <code className="bg-gray-800 px-2 py-1 rounded">api/verify.py</code>:</p>
+                <CodeBlock
+                  language="api/verify.py"
+                  id="verify-endpoint"
+                  code={`from http.server import BaseHTTPRequestHandler
+import json
+from .shared import users
 
-    if (!user.isVerified) {
-      return res.status(400).json({ 
-        message: 'Please verify your email before logging in' 
-      });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    const token = jwt.sign(
-      { 
-        userId: user._id, 
-        email: user.email 
-      },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    res.json({
-      message: 'Login successful',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        isVerified: user.isVerified
-      }
-    });
-
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-app.post('/api/verify-email', async (req, res) => {
-  const { userId, verificationCode } = req.body;
-
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({ message: 'User not found' });
-    }
-
-    if (user.verificationCode !== verificationCode) {
-      return res.status(400).json({ message: 'Invalid verification code' });
-    }
-
-    user.isVerified = true;
-    user.verificationCode = undefined; // Remove the code
-    await user.save();
-
-    res.json({ message: 'Email verified successfully' });
-
-  } catch (error) {
-    console.error('Verification error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-app.get('/api/dashboard', authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId).select('-password');
-    res.json({
-      message: 'Welcome to your dashboard!',
-      user
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log('Server running on port ' + PORT);
-});`}
+class handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        if self.path == '/api/verify':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            email = data.get('email')
+            verification_code = data.get('verification_code')
+            
+            # Check if user exists
+            if email not in users:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = {"error": "User not found"}
+                self.wfile.write(json.dumps(response).encode())
+                return
+            
+            user = users[email]
+            
+            # Check verification code
+            if user.get('verification_code') != verification_code:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = {"error": "Invalid verification code"}
+                self.wfile.write(json.dumps(response).encode())
+                return
+            
+            # Mark user as verified
+            users[email]['verified'] = True
+            users[email]['verification_code'] = None
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = {"message": "Email verified successfully"}
+            self.wfile.write(json.dumps(response).encode())`}
                 />
               </div>
 
