@@ -182,7 +182,7 @@ function App() {
         </header>
 
         <div className="flex justify-center mb-8">
-          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as any)} className="w-full max-w-4xl">
+          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as "tutorial" | "auth" | "verify" | "dashboard")} className="w-full max-w-4xl">
             <TabsList className="grid w-full grid-cols-4 bg-gray-800">
               <TabsTrigger value="tutorial" className="text-white">Tutorial</TabsTrigger>
               <TabsTrigger value="auth" className="text-white">Demo</TabsTrigger>
