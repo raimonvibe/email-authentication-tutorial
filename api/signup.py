@@ -82,6 +82,7 @@ class handler(BaseHTTPRequestHandler):
         """Send verification email via Formspree"""
         try:
             formspree_api_key = os.getenv('FORMSPREE_API_KEY')
+            print(f"DEBUG: FORMSPREE_API_KEY = {formspree_api_key}")
             if not formspree_api_key:
                 print("Warning: FORMSPREE_API_KEY not found in environment variables")
                 return False
@@ -91,18 +92,27 @@ class handler(BaseHTTPRequestHandler):
             else:
                 formspree_endpoint = f'https://formspree.io/f/{formspree_api_key}'
             
+            print(f"DEBUG: Formspree endpoint = {formspree_endpoint}")
+            
             email_data = {
                 'email': email,
                 'message': f'Your verification code is: {verification_code}'
             }
+            
+            print(f"DEBUG: Email data = {email_data}")
             
             data = urllib.parse.urlencode(email_data).encode('utf-8')
             req = urllib.request.Request(formspree_endpoint, data=data)
             req.add_header('Content-Type', 'application/x-www-form-urlencoded')
             req.add_header('Accept', 'application/json')
             
+            print(f"DEBUG: Request headers = {dict(req.headers)}")
+            print(f"DEBUG: Request data = {data}")
+            
             with urllib.request.urlopen(req) as response:
                 response_data = response.read().decode('utf-8')
+                print(f"DEBUG: Response status = {response.status}")
+                print(f"DEBUG: Response data = {response_data}")
                 if response.status == 200:
                     print(f"Verification email sent successfully to {email}")
                     return True
@@ -112,6 +122,9 @@ class handler(BaseHTTPRequestHandler):
                     
         except Exception as e:
             print(f"Error sending verification email: {str(e)}")
+            print(f"DEBUG: Exception type = {type(e)}")
+            import traceback
+            print(f"DEBUG: Traceback = {traceback.format_exc()}")
             return False
     
     def do_OPTIONS(self):
