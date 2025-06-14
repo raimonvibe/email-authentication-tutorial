@@ -1,6 +1,10 @@
 from http.server import BaseHTTPRequestHandler
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+import os
+import json
+import urllib.request
+import urllib.parse
 from .shared import users_db, verification_codes, hash_password, generate_verification_code
 
 class UserSignup(BaseModel):
@@ -47,15 +51,25 @@ class handler(BaseHTTPRequestHandler):
             
             verification_codes[user_data.email] = verification_code
             
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "message": "Account created successfully! Use verification code: " + verification_code,
-                "user_id": user_id,
-                "verification_code": verification_code
-            }).encode())
+            email_sent = self.send_verification_email(user_data.email, verification_code)
+            
+            if email_sent:
+                self.send_response(200)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "message": "Account created successfully! Please check your email for the verification code.",
+                    "user_id": user_id
+                }).encode())
+            else:
+                self.send_response(500)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "detail": "Account created but failed to send verification email. Please contact support."
+                }).encode())
             
         except Exception as e:
             self.send_response(500)
@@ -63,6 +77,45 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({"detail": str(e)}).encode())
+    
+    def send_verification_email(self, email, verification_code):
+        """Send verification email via Formspree"""
+        try:
+            formspree_api_key = os.getenv('FORMSPREE_API_KEY')
+            if not formspree_api_key:
+                print("Warning: FORMSPREE_API_KEY not found in environment variables")
+                return False
+            
+            if formspree_api_key.startswith('https://'):
+                formspree_endpoint = formspree_api_key
+            else:
+                formspree_endpoint = f'https://formspree.io/f/{formspree_api_key}'
+            
+            email_data = {
+                'email': email,
+                'subject': 'Email Verification Code',
+                'message': f'Your verification code is: {verification_code}',
+                'verification_code': verification_code,
+                '_replyto': email
+            }
+            
+            data = urllib.parse.urlencode(email_data).encode('utf-8')
+            req = urllib.request.Request(formspree_endpoint, data=data)
+            req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+            req.add_header('Accept', 'application/json')
+            
+            with urllib.request.urlopen(req) as response:
+                response_data = response.read().decode('utf-8')
+                if response.status == 200:
+                    print(f"Verification email sent successfully to {email}")
+                    return True
+                else:
+                    print(f"Failed to send email. Status: {response.status}, Response: {response_data}")
+                    return False
+                    
+        except Exception as e:
+            print(f"Error sending verification email: {str(e)}")
+            return False
     
     def do_OPTIONS(self):
         self.send_response(200)
