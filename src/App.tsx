@@ -811,18 +811,18 @@ function LoginForm() {
               </div>
 
               <div>
-                <h4 className="text-lg font-semibold text-pink-400 mb-3">Backend: Email Sending Integration</h4>
-                <p className="text-gray-400 text-sm mb-3">The email sending function will be included in the complete <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> file in the <strong>Backend Logic & Authentication</strong> section below. This integration allows your serverless functions to send verification emails via Formspree.</p>
+                <h4 className="text-lg font-semibold text-pink-400 mb-3">Integration Overview</h4>
+                <p className="text-gray-400 text-sm mb-3">This section covers frontend email handling. The backend email sending function will be created in the <strong>Backend Logic & Authentication</strong> section below as part of the complete <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> file.</p>
                 <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                    <span className="text-blue-300 font-medium">Integration Overview</span>
+                    <span className="text-blue-300 font-medium">Frontend Focus</span>
                   </div>
                   <ul className="text-sm text-gray-300 space-y-1">
-                    <li>• Email sending function will be part of the shared utilities</li>
-                    <li>• Uses Formspree API for reliable email delivery</li>
-                    <li>• Integrated with user signup and verification flow</li>
-                    <li>• Environment variables configured in Vercel dashboard</li>
+                    <li>• Frontend components for email verification UI</li>
+                    <li>• Client-side form handling and validation</li>
+                    <li>• API calls to backend verification endpoints</li>
+                    <li>• Backend email sending will be handled in Section 5</li>
                   </ul>
                 </div>
               </div>
