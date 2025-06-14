@@ -812,7 +812,7 @@ function LoginForm() {
 
               <div>
                 <h4 className="text-lg font-semibold text-pink-400 mb-3">Integration Overview</h4>
-                <p className="text-gray-400 text-sm mb-3">This section covers frontend email handling. The backend email sending function will be created in the <strong>Backend Logic & Authentication</strong> section below as part of the complete <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> file.</p>
+                <p className="text-gray-400 text-sm mb-3">This section covers frontend email handling. The backend email sending function will be created in the <strong>Backend Logic &amp; Authentication</strong> section below as part of the complete <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> file.</p>
                 <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
@@ -952,7 +952,7 @@ function VerificationForm({ userId }) {
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold">5</div>
-                <CardTitle className="text-2xl text-white">Backend Logic & Authentication</CardTitle>
+                <CardTitle className="text-2xl text-white">Backend Logic &amp; Authentication</CardTitle>
               </div>
               <CardDescription className="text-gray-400">
                 Complete backend implementation with password hashing, JWT tokens, and user management
@@ -1216,7 +1216,7 @@ app.listen(PORT, () => {
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
                       <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold">6</div>
-                      <span className="text-sm">Account becomes verified & active</span>
+                      <span className="text-sm">Account becomes verified &amp; active</span>
                     </div>
                   </div>
                 </div>
@@ -1226,7 +1226,7 @@ app.listen(PORT, () => {
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
                       <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold">1</div>
-                      <span className="text-sm">User enters email & password</span>
+                      <span className="text-sm">User enters email &amp; password</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
                       <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold">2</div>
