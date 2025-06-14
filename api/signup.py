@@ -108,74 +108,74 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"detail": str(e)}).encode())
     
     def send_verification_email(self, email, verification_code):
-        """Send verification email via Formspree"""
+        """Send verification email via SendGrid"""
         try:
-            formspree_api_key = None
+            sendgrid_api_key = None
             
-            formspree_api_key = (
-                os.getenv('FORMSPREE_API_KEY') or 
-                os.environ.get('FORMSPREE_API_KEY') or
-                os.getenv('formspree_api_key') or
-                os.environ.get('formspree_api_key')
+            sendgrid_api_key = (
+                os.getenv('SENDGRID_API_KEY') or 
+                os.environ.get('SENDGRID_API_KEY') or
+                os.getenv('sendgrid_api_key') or
+                os.environ.get('sendgrid_api_key')
             )
-            print(f"DEBUG: Method 1 - FORMSPREE_API_KEY = {formspree_api_key}")
+            print(f"DEBUG: Method 1 - SENDGRID_API_KEY = {sendgrid_api_key}")
             
-            if not formspree_api_key:
-                for key_name in ['FORMSPREE_API_KEY', 'formspree_api_key', 'Formspree_Api_Key']:
-                    formspree_api_key = os.environ.get(key_name)
-                    if formspree_api_key:
-                        print(f"DEBUG: Method 2 - Found {key_name} = {formspree_api_key}")
+            if not sendgrid_api_key:
+                for key_name in ['SENDGRID_API_KEY', 'sendgrid_api_key', 'SendGrid_Api_Key']:
+                    sendgrid_api_key = os.environ.get(key_name)
+                    if sendgrid_api_key:
+                        print(f"DEBUG: Method 2 - Found {key_name} = {sendgrid_api_key}")
                         break
             
-            if not formspree_api_key:
+            if not sendgrid_api_key:
                 try:
                     import subprocess
-                    result = subprocess.run(['printenv', 'FORMSPREE_API_KEY'], capture_output=True, text=True)
+                    result = subprocess.run(['printenv', 'SENDGRID_API_KEY'], capture_output=True, text=True)
                     if result.returncode == 0 and result.stdout.strip():
-                        formspree_api_key = result.stdout.strip()
-                        print(f"DEBUG: Method 3 - Found FORMSPREE_API_KEY via printenv: {formspree_api_key}")
+                        sendgrid_api_key = result.stdout.strip()
+                        print(f"DEBUG: Method 3 - Found SENDGRID_API_KEY via printenv: {sendgrid_api_key}")
                 except Exception as e:
                     print(f"DEBUG: Method 3 - printenv attempt failed: {e}")
             
-            if not formspree_api_key:
-                formspree_api_key = "xwplqeky"  # Temporary hardcode for testing
-                print(f"DEBUG: Method 4 - Using hardcoded key for testing: {formspree_api_key}")
-            
-            if not formspree_api_key:
-                print("ERROR: FORMSPREE_API_KEY not found in environment variables")
+            if not sendgrid_api_key:
+                print("ERROR: SENDGRID_API_KEY not found in environment variables")
                 print(f"DEBUG: Available env vars: {list(os.environ.keys())}")
                 return False
             
-            if formspree_api_key.startswith('https://'):
-                formspree_endpoint = formspree_api_key
-            elif formspree_api_key.startswith('http://'):
-                formspree_endpoint = formspree_api_key  
-            else:
-                formspree_endpoint = f'https://formspree.io/f/{formspree_api_key}'
+            sendgrid_endpoint = 'https://api.sendgrid.com/v3/mail/send'
             
-            print(f"DEBUG: Formspree endpoint = {formspree_endpoint}")
-            
-            email_data = {
-                'email': email,
-                'message': f'Your verification code is: {verification_code}'
+            email_payload = {
+                "personalizations": [
+                    {
+                        "to": [{"email": email}],
+                        "subject": "Email Verification Code"
+                    }
+                ],
+                "from": {"email": "noreply@email-auth-tutorial.com", "name": "Email Auth Tutorial"},
+                "content": [
+                    {
+                        "type": "text/plain",
+                        "value": f"Your verification code is: {verification_code}\n\nPlease enter this code to verify your email address."
+                    }
+                ]
             }
             
-            print(f"DEBUG: Email data = {email_data}")
+            print(f"DEBUG: SendGrid endpoint = {sendgrid_endpoint}")
+            print(f"DEBUG: Email payload = {email_payload}")
             
-            data = urllib.parse.urlencode(email_data).encode('utf-8')
-            req = urllib.request.Request(formspree_endpoint, data=data)
-            req.add_header('Content-Type', 'application/x-www-form-urlencoded')
-            req.add_header('Accept', 'application/json')
+            data = json.dumps(email_payload).encode('utf-8')
+            req = urllib.request.Request(sendgrid_endpoint, data=data, method='POST')
+            req.add_header('Content-Type', 'application/json')
+            req.add_header('Authorization', f'Bearer {sendgrid_api_key}')
             req.add_header('User-Agent', 'Mozilla/5.0 (compatible; EmailAuthTutorial/1.0)')
             
             print(f"DEBUG: Request headers = {dict(req.headers)}")
-            print(f"DEBUG: Request data = {data}")
             
             with urllib.request.urlopen(req) as response:
                 response_data = response.read().decode('utf-8')
                 print(f"DEBUG: Response status = {response.status}")
                 print(f"DEBUG: Response data = {response_data}")
-                if response.status == 200:
+                if response.status == 202:  # SendGrid returns 202 for successful email queuing
                     print(f"Verification email sent successfully to {email}")
                     return True
                 else:
