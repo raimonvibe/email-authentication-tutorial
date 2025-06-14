@@ -340,7 +340,7 @@ function App() {
                           <li>Create a free account at <span className="text-blue-400">https://formspree.io</span></li>
                           <li>Create a new form and copy the Form ID</li>
                           <li>In Vercel dashboard, add environment variable: <code className="bg-gray-800 px-2 py-1 rounded">FORMSPREE_API_KEY</code></li>
-                          <li>The system handles duplicate users by allowing verification code resending for unverified accounts</li>
+                          <li>The system prevents duplicate verified users and allows verification code resending for unverified accounts</li>
                         </ol>
                       </div>
                     </div>
@@ -858,7 +858,7 @@ function LoginForm() {
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                   Integration Overview
                 </h4>
-                <p className="text-gray-400 text-sm mb-3">This section covers frontend email handling. The backend email sending function will be created in the <strong>Backend Logic & Authentication</strong> section below as part of the complete <code className="bg-gray-800 px-2 py-1 rounded">api/shared.py</code> file.</p>
+                <p className="text-gray-400 text-sm mb-3">This section covers frontend email handling. The backend email sending function is implemented in the <code className="bg-gray-800 px-2 py-1 rounded">api/signup.py</code> file as part of the user registration process.</p>
                 <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
