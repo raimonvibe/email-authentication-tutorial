@@ -93,10 +93,7 @@ class handler(BaseHTTPRequestHandler):
             
             email_data = {
                 'email': email,
-                'subject': 'Email Verification Code',
-                'message': f'Your verification code is: {verification_code}',
-                'verification_code': verification_code,
-                '_replyto': email
+                'message': f'Your verification code is: {verification_code}'
             }
             
             data = urllib.parse.urlencode(email_data).encode('utf-8')
