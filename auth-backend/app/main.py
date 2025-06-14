@@ -75,54 +75,86 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 def send_verification_email(email: str, verification_code: str) -> bool:
-    """Send verification email via Formspree"""
+    """Send verification email via Brevo (formerly SendInBlue)"""
     try:
-        formspree_api_key = (
-            os.getenv('FORMSPREE_API_KEY') or 
-            os.environ.get('FORMSPREE_API_KEY') or
-            os.getenv('formspree_api_key') or
-            os.environ.get('formspree_api_key')
-        )
+        brevo_api_key = None
         
-        if not formspree_api_key:
-            print("Warning: FORMSPREE_API_KEY not found in environment variables")
+        brevo_api_key = (
+            os.getenv('BREVO_API_KEY') or 
+            os.environ.get('BREVO_API_KEY') or
+            os.getenv('brevo_api_key') or
+            os.environ.get('brevo_api_key')
+        )
+        print(f"DEBUG: Method 1 - BREVO_API_KEY = {brevo_api_key}")
+        
+        if not brevo_api_key:
+            for key_name in ['BREVO_API_KEY', 'brevo_api_key', 'Brevo_Api_Key']:
+                brevo_api_key = os.environ.get(key_name)
+                if brevo_api_key:
+                    print(f"DEBUG: Method 2 - Found {key_name} = {brevo_api_key}")
+                    break
+        
+        if not brevo_api_key:
             try:
                 import subprocess
-                result = subprocess.run(['printenv', 'FORMSPREE_API_KEY'], capture_output=True, text=True)
+                result = subprocess.run(['printenv', 'BREVO_API_KEY'], capture_output=True, text=True)
                 if result.returncode == 0 and result.stdout.strip():
-                    formspree_api_key = result.stdout.strip()
-                    print(f"Found FORMSPREE_API_KEY via printenv: {formspree_api_key}")
+                    brevo_api_key = result.stdout.strip()
+                    print(f"DEBUG: Method 3 - Found BREVO_API_KEY via printenv: {brevo_api_key}")
             except Exception as e:
-                print(f"printenv attempt failed: {e}")
-            
-            if not formspree_api_key:
-                return False
+                print(f"DEBUG: Method 3 - printenv attempt failed: {e}")
         
-        if formspree_api_key.startswith('https://'):
-            formspree_endpoint = formspree_api_key
-        else:
-            formspree_endpoint = f'https://formspree.io/f/{formspree_api_key}'
+        if not brevo_api_key:
+            print("ERROR: BREVO_API_KEY not found in environment variables")
+            print(f"DEBUG: Available env vars: {list(os.environ.keys())}")
+            return False
         
-        email_data = {
-            'email': email,
-            'message': f'Your verification code is: {verification_code}'
+        brevo_endpoint = 'https://api.brevo.com/v3/smtp/email'
+        
+        email_payload = {
+            "sender": {
+                "email": "noreply@email-auth-tutorial.com",
+                "name": "Email Auth Tutorial"
+            },
+            "to": [
+                {
+                    "email": email,
+                    "name": "User"
+                }
+            ],
+            "subject": "Email Verification Code",
+            "htmlContent": f"<html><body><p>Your verification code is: <strong>{verification_code}</strong></p><p>Please enter this code to verify your email address.</p></body></html>"
         }
         
-        data = urllib.parse.urlencode(email_data).encode('utf-8')
-        req = urllib.request.Request(formspree_endpoint, data=data)
-        req.add_header('Content-Type', 'application/x-www-form-urlencoded')
-        req.add_header('Accept', 'application/json')
+        print(f"DEBUG: Brevo endpoint = {brevo_endpoint}")
+        print(f"DEBUG: Email payload = {email_payload}")
+        
+        import json
+        data = json.dumps(email_payload).encode('utf-8')
+        req = urllib.request.Request(brevo_endpoint, data=data, method='POST')
+        req.add_header('Content-Type', 'application/json')
+        req.add_header('api-key', brevo_api_key)
+        req.add_header('accept', 'application/json')
+        req.add_header('User-Agent', 'Mozilla/5.0 (compatible; EmailAuthTutorial/1.0)')
+        
+        print(f"DEBUG: Request headers = {dict(req.headers)}")
         
         with urllib.request.urlopen(req) as response:
-            if response.status == 200:
+            response_data = response.read().decode('utf-8')
+            print(f"DEBUG: Response status = {response.status}")
+            print(f"DEBUG: Response data = {response_data}")
+            if response.status == 201:  # Brevo returns 201 for successful email sending
                 print(f"Verification email sent successfully to {email}")
                 return True
             else:
-                print(f"Failed to send email. Status: {response.status}")
+                print(f"Failed to send email. Status: {response.status}, Response: {response_data}")
                 return False
                 
     except Exception as e:
         print(f"Error sending verification email: {str(e)}")
+        print(f"DEBUG: Exception type = {type(e)}")
+        import traceback
+        print(f"DEBUG: Traceback = {traceback.format_exc()}")
         return False
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
