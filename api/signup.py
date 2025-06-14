@@ -21,12 +21,40 @@ class handler(BaseHTTPRequestHandler):
             user_data = UserSignup(**json.loads(body))
             
             if user_data.email in users_db:
-                self.send_response(400)
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"detail": "User with this email already exists"}).encode())
-                return
+                existing_user = users_db[user_data.email]
+                if existing_user["is_verified"]:
+                    self.send_response(400)
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"detail": "User with this email already exists"}).encode())
+                    return
+                else:
+                    print(f"DEBUG: User {user_data.email} exists but not verified, allowing resend")
+                    verification_code = generate_verification_code()
+                    users_db[user_data.email]["verification_code"] = verification_code
+                    verification_codes[user_data.email] = verification_code
+                    
+                    email_sent = self.send_verification_email(user_data.email, verification_code)
+                    
+                    if email_sent:
+                        self.send_response(200)
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            "message": "Verification email resent! Please check your email for the new verification code.",
+                            "user_id": existing_user["id"]
+                        }).encode())
+                    else:
+                        self.send_response(500)
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            "detail": "Failed to resend verification email. Please contact support."
+                        }).encode())
+                    return
             
             if len(user_data.password) < 6:
                 self.send_response(400)
