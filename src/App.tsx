@@ -49,7 +49,7 @@ function App() {
     setMessage('')
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/signup`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001'}/api/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ function App() {
     setMessage('')
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/verify-email`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001'}/api/verify-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ function App() {
     setMessage('')
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001'}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ function App() {
             </h1>
           </div>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Learn how to build complete email signup and login functionality with email verification using Formspree. 
+            Learn how to build complete email signup and login functionality with email verification using Brevo. 
             Perfect for beginners who want to understand authentication from frontend to backend.
           </p>
           <div className="flex justify-center gap-3 mt-6">
@@ -335,11 +335,11 @@ function App() {
                     <div className="space-y-4">
                       <h4 className="text-white font-medium text-lg">Step 5: Set up Environment Variables</h4>
                       <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                        <p className="text-gray-300 text-sm mb-3">Configure Formspree for email verification:</p>
+                        <p className="text-gray-300 text-sm mb-3">Configure Brevo for email verification:</p>
                         <ol className="list-decimal list-inside space-y-2 text-sm text-gray-400">
-                          <li>Create a free account at <span className="text-blue-400">https://formspree.io</span></li>
-                          <li>Create a new form and copy the Form ID</li>
-                          <li>In Vercel dashboard, add environment variable: <code className="bg-gray-800 px-2 py-1 rounded">FORMSPREE_API_KEY</code></li>
+                          <li>Create a free account at <span className="text-blue-400">https://brevo.com</span></li>
+                          <li>Generate an API key from SMTP & API section</li>
+                          <li>In Vercel dashboard, add environment variable: <code className="bg-gray-800 px-2 py-1 rounded">BREVO_API_KEY</code></li>
                           <li>The system prevents duplicate verified users and allows verification code resending for unverified accounts</li>
                         </ol>
                       </div>
@@ -830,25 +830,25 @@ function LoginForm() {
                 <div className="w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center text-white font-bold">4</div>
                 <CardTitle className="text-2xl text-white flex items-center gap-2">
                   <Mail className="w-6 h-6" />
-                  Email Verification with Formspree
+                  Email Verification with Brevo
                 </CardTitle>
               </div>
               <CardDescription className="text-gray-400">
-                Set up email verification using Formspree to send 5-digit confirmation codes
+                Set up email verification using Brevo to send 5-digit confirmation codes
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               <div className="bg-gradient-to-r from-pink-900/20 to-purple-900/20 p-6 rounded-xl border border-pink-700/30">
                 <h4 className="text-lg font-semibold text-pink-400 mb-4 flex items-center gap-2">
                   <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                  Formspree Setup Guide
+                  Brevo Setup Guide
                 </h4>
                 <div className="bg-gray-700 p-4 rounded-lg">
                   <ol className="text-sm text-gray-300 space-y-2">
-                    <li>1. Go to <a href="https://formspree.io" className="text-pink-400 hover:underline">formspree.io</a> and create an account</li>
-                    <li>2. Create a new form and get your form endpoint URL</li>
-                    <li>3. Configure your form to send emails with verification codes</li>
-                    <li>4. Use the endpoint in your backend to trigger verification emails</li>
+                    <li>1. Go to <a href="https://brevo.com" className="text-pink-400 hover:underline">brevo.com</a> and create an account</li>
+                    <li>2. Navigate to SMTP & API section and generate an API key</li>
+                    <li>3. Configure your backend with the BREVO_API_KEY environment variable</li>
+                    <li>4. Use the Brevo API in your backend to send verification emails</li>
                   </ol>
                 </div>
               </div>
@@ -883,7 +883,7 @@ function LoginForm() {
                   language="src/utils/emailService.js"
                   id="frontend-email-service"
                   code={`async function sendVerificationEmail(email, verificationCode) {
-  const formspreeEndpoint = 'https://formspree.io/f/YOUR_FORM_ID';
+  const brevoEndpoint = 'https://api.brevo.com/v3/smtp/email';
   
   const emailData = {
     email: email,
@@ -894,7 +894,7 @@ function LoginForm() {
   };
 
   try {
-    const response = await fetch(formspreeEndpoint, {
+    const response = await fetch(brevoEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1049,13 +1049,13 @@ def create_access_token(data: dict) -> str:
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-def send_verification_email(email: str, code: str, formspree_key: str) -> bool:
-    """Send verification email via Formspree API"""
+def send_verification_email(email: str, code: str, brevo_key: str) -> bool:
+    """Send verification email via Brevo API"""
     import requests
     
     try:
         response = requests.post(
-            f"https://formspree.io/f/{formspree_key}",
+            "https://api.brevo.com/v3/smtp/email",
             json={
                 "email": email,
                 "subject": "Email Verification Code",
@@ -1266,7 +1266,7 @@ app.listen(PORT, () => {
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
                       <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold">4</div>
-                      <span className="text-sm">Verification email sent via Formspree</span>
+                      <span className="text-sm">Verification email sent via Brevo</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
                       <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold">5</div>
