@@ -1,32 +1,23 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
   "functions": {
     "api/signup.py": {
-      "runtime": "@vercel/python"
+      "runtime": "python3.9"
     },
     "api/verify-email.py": {
-      "runtime": "@vercel/python"
+      "runtime": "python3.9"
     },
     "api/login.py": {
-      "runtime": "@vercel/python"
+      "runtime": "python3.9"
     },
     "api/dashboard.py": {
-      "runtime": "@vercel/python"
+      "runtime": "python3.9"
     },
     "api/users.py": {
-      "runtime": "@vercel/python"
+      "runtime": "python3.9"
     },
     "api/healthz.py": {
-      "runtime": "@vercel/python"
+      "runtime": "python3.9"
     }
   },
   "routes": [
@@ -58,8 +49,5 @@
       "src": "/(.*)",
       "dest": "/dist/$1"
     }
-  ],
-  "env": {
-    "SECRET_KEY": "@secret_key"
-  }
+  ]
 }
