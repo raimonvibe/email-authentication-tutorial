@@ -32,10 +32,35 @@ BREVO_API_KEY=your-brevo-api-key-here
 
 Set the environment variables in your hosting platform:
 
-- **Vercel**: Add environment variables in your project settings
+#### Vercel Deployment (Recommended)
+
+1. Go to your Vercel project dashboard
+2. Navigate to **Settings** → **Environment Variables**
+3. Add the following environment variables:
+   - **Name**: `BREVO_API_KEY`
+   - **Value**: Your Brevo API key (starts with `xkeysib-`)
+   - **Environment**: Select all environments (Production, Preview, Development)
+4. Click **Save**
+5. **Important**: Redeploy your application after adding environment variables
+   - Go to **Deployments** tab
+   - Click the three dots on the latest deployment
+   - Select **Redeploy**
+
+#### Other Platforms
+
 - **Heroku**: Use `heroku config:set BREVO_API_KEY=your-key`
 - **Railway**: Add in the Variables section
 - **Render**: Add in the Environment section
+
+#### Troubleshooting Environment Variables
+
+If emails are not being sent in production:
+
+1. **Verify the API key format**: Brevo API keys start with `xkeysib-`
+2. **Check environment variable name**: Must be exactly `BREVO_API_KEY` (case-sensitive)
+3. **Ensure no extra spaces**: Copy the key directly without trailing spaces
+4. **Redeploy after changes**: Environment variables require a fresh deployment
+5. **Check Vercel function logs**: Go to Vercel dashboard → Functions → View logs
 
 ## 4. Verify Your Sender Domain (Optional but Recommended)
 
