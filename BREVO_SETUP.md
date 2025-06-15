@@ -26,6 +26,8 @@ Create a `.env` file in your `auth-backend` directory:
 # auth-backend/.env
 SECRET_KEY=your-secret-key-change-in-production-use-strong-random-key
 BREVO_API_KEY=your-brevo-api-key-here
+BREVO_SENDER_EMAIL=info@raimonvibe.com
+BREVO_SENDER_NAME=Raimon Vibe
 ```
 
 ### For Production Deployment
@@ -39,6 +41,12 @@ Set the environment variables in your hosting platform:
 3. Add the following environment variables:
    - **Name**: `BREVO_API_KEY`
    - **Value**: Your Brevo API key (starts with `xkeysib-`)
+   - **Environment**: Select all environments (Production, Preview, Development)
+   - **Name**: `BREVO_SENDER_EMAIL`
+   - **Value**: Your verified domain email (e.g., `info@yourdomain.com`)
+   - **Environment**: Select all environments (Production, Preview, Development)
+   - **Name**: `BREVO_SENDER_NAME`
+   - **Value**: Your sender name (e.g., `Your App Name`)
    - **Environment**: Select all environments (Production, Preview, Development)
 4. Click **Save**
 5. **Important**: Redeploy your application after adding environment variables
@@ -62,13 +70,40 @@ If emails are not being sent in production:
 4. **Redeploy after changes**: Environment variables require a fresh deployment
 5. **Check Vercel function logs**: Go to Vercel dashboard → Functions → View logs
 
-## 4. Verify Your Sender Domain (Optional but Recommended)
+## 4. Verify Your Sender Domain (Required for Production)
 
-For better deliverability:
+For email delivery to work properly, you must verify your domain:
 
-1. In Brevo dashboard, go to **Senders & IP**
-2. Add and verify your domain
-3. Update the sender email in your backend code to use your verified domain
+### Step 1: Add Domain to Brevo
+1. In Brevo dashboard, go to **Senders, Domains & Dedicated IPs**
+2. Click **Domains** tab
+3. Click **Add a domain**
+4. Enter your domain name (e.g., `raimonvibe.com`)
+
+### Step 2: Authenticate Your Domain
+After adding your domain, you'll need to add DNS records to authenticate it:
+
+1. **Brevo Code (TXT Record)**
+   - Add a TXT record to your domain's DNS
+   - Record will be provided by Brevo after adding the domain
+
+2. **DKIM Record (TXT or CNAME)**
+   - Add the DKIM record provided by Brevo
+   - This digitally signs your emails
+
+3. **DMARC Record (TXT)**
+   - Add a DMARC policy record
+   - Example: `v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com`
+
+### Step 3: Verify Authentication
+1. After adding DNS records, click **Authenticate** in Brevo dashboard
+2. Wait for DNS propagation (can take up to 24 hours)
+3. Verify all records show as "Authenticated"
+
+### Step 4: Update Environment Variables
+Once domain is verified, update your environment variables:
+- Set `BREVO_SENDER_EMAIL` to your verified email (e.g., `info@raimonvibe.com`)
+- Set `BREVO_SENDER_NAME` to your preferred sender name
 
 ## 5. Test Your Setup
 

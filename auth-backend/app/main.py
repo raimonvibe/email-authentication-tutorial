@@ -115,8 +115,8 @@ def send_verification_email(email: str, verification_code: str) -> bool:
         
         email_payload = {
             "sender": {
-                "email": "noreply@email-auth-tutorial.com",
-                "name": "Email Auth Tutorial"
+                "email": os.getenv("BREVO_SENDER_EMAIL", "info@raimonvibe.com"),
+                "name": os.getenv("BREVO_SENDER_NAME", "Raimon Vibe")
             },
             "to": [
                 {

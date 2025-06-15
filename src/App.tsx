@@ -283,8 +283,8 @@ mkdir app && touch app/__init__.py app/main.py`}
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
 BREVO_API_KEY=your-brevo-api-key
-BREVO_SENDER_EMAIL=noreply@yourdomain.com
-BREVO_SENDER_NAME=Your App Name`}
+BREVO_SENDER_EMAIL=info@raimonvibe.com
+BREVO_SENDER_NAME=Raimon Vibe`}
                       />
                     </div>
 
