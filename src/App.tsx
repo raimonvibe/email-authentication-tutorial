@@ -40,7 +40,7 @@ const CodeBlock: React.FC<{ language: string; id: string; code: string }> = ({ l
   }
   
   return (
-    <div className="bg-gray-900 rounded-xl p-6 my-8 overflow-hidden border-2 border-gray-600 shadow-2xl">
+    <div className="min-w-0 bg-gray-900 rounded-xl p-4 sm:p-6 my-6 sm:my-8 overflow-hidden border-2 border-gray-600 shadow-2xl">
       <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-600">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -68,7 +68,7 @@ const CodeBlock: React.FC<{ language: string; id: string; code: string }> = ({ l
         </div>
       </div>
       {isVisible && (
-        <pre className="text-sm text-gray-300 overflow-x-auto">
+        <pre className="text-xs sm:text-sm text-gray-300 overflow-x-auto">
           <code>{code}</code>
         </pre>
       )}
@@ -188,30 +188,30 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <header className="text-center mb-12">
-          <div className="flex justify-center items-center gap-3 mb-4">
-            <Shield className="w-12 h-12 text-purple-400" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-4">
+            <Shield className="w-10 h-10 sm:w-12 sm:h-12 text-purple-400" />
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Email Authentication Tutorial
             </h1>
           </div>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
             Learn to build secure email-based authentication with FastAPI and React. 
             Complete with JWT tokens, email verification, and production-ready security practices.
           </p>
         </header>
 
         <div className="flex justify-center mb-8">
-          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as "tutorial" | "auth" | "verify" | "dashboard")} className="w-full max-w-4xl">
+          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as "tutorial" | "auth" | "verify" | "dashboard")} className="w-full max-w-4xl min-w-0">
             <TabsList className="grid w-full grid-cols-4 bg-gray-800">
-              <TabsTrigger value="tutorial" className="text-white">Tutorial</TabsTrigger>
-              <TabsTrigger value="auth" className="text-white">Demo</TabsTrigger>
-              <TabsTrigger value="verify" className="text-white" disabled={!signupForm.email}>Verify</TabsTrigger>
-              <TabsTrigger value="dashboard" className="text-white" disabled={!user}>Dashboard</TabsTrigger>
+              <TabsTrigger value="tutorial" className="text-white text-xs sm:text-sm px-1 sm:px-3">Tutorial</TabsTrigger>
+              <TabsTrigger value="auth" className="text-white text-xs sm:text-sm px-1 sm:px-3">Demo</TabsTrigger>
+              <TabsTrigger value="verify" className="text-white text-xs sm:text-sm px-1 sm:px-3" disabled={!signupForm.email}>Verify</TabsTrigger>
+              <TabsTrigger value="dashboard" className="text-white text-xs sm:text-sm px-1 sm:px-3" disabled={!user}>Dashboard</TabsTrigger>
             </TabsList>
 
             <TabsContent value="tutorial" className="mt-8">
-              <div className="grid gap-8">
-                <Card className="bg-gray-800 border-gray-700">
+              <div className="grid grid-cols-1 gap-8">
+                <Card className="min-w-0 bg-gray-800 border-gray-700">
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">1</div>
@@ -222,7 +222,7 @@ function App() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 p-6 rounded-xl border border-blue-700/30">
+                    <div className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 p-4 sm:p-6 rounded-xl min-w-0 border border-blue-700/30">
                       <h4 className="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                         Frontend Setup (React + TypeScript)
@@ -239,7 +239,7 @@ npm run dev`}
                       />
                     </div>
 
-                    <div className="bg-gradient-to-r from-green-900/20 to-teal-900/20 p-6 rounded-xl border border-green-700/30">
+                    <div className="bg-gradient-to-r from-green-900/20 to-teal-900/20 p-4 sm:p-6 rounded-xl min-w-0 border border-green-700/30">
                       <h4 className="text-lg font-semibold text-green-400 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                         Backend Setup (FastAPI)
@@ -259,7 +259,7 @@ mkdir app && touch app/__init__.py app/main.py`}
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="min-w-0 bg-gray-800 border-gray-700">
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold">2</div>
@@ -270,7 +270,7 @@ mkdir app && touch app/__init__.py app/main.py`}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 p-6 rounded-xl border border-green-700/30">
+                    <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 p-4 sm:p-6 rounded-xl min-w-0 border border-green-700/30">
                       <h4 className="text-lg font-semibold text-green-400 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                         Backend Environment (.env)
@@ -288,7 +288,7 @@ BREVO_SENDER_NAME=Your App Name`}
                       />
                     </div>
 
-                    <div className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 p-6 rounded-xl border border-blue-700/30">
+                    <div className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 p-4 sm:p-6 rounded-xl min-w-0 border border-blue-700/30">
                       <h4 className="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                         Frontend Environment (.env)
@@ -303,7 +303,7 @@ BREVO_SENDER_NAME=Your App Name`}
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="min-w-0 bg-gray-800 border-gray-700">
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-yellow-600 rounded-full flex items-center justify-center text-white font-bold">3</div>
@@ -314,7 +314,7 @@ BREVO_SENDER_NAME=Your App Name`}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-6 rounded-xl border border-blue-700/30">
+                    <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-4 sm:p-6 rounded-xl min-w-0 border border-blue-700/30">
                       <h4 className="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                         🚀 Approach 1: FastAPI Backend (Recommended for Learning)
@@ -329,7 +329,7 @@ BREVO_SENDER_NAME=Your App Name`}
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 p-6 rounded-xl border border-orange-700/30">
+                    <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 p-4 sm:p-6 rounded-xl min-w-0 border border-orange-700/30">
                       <h4 className="text-lg font-semibold text-orange-400 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
                         ⚡ Approach 2: Vercel Serverless Functions (Advanced)
@@ -346,7 +346,7 @@ BREVO_SENDER_NAME=Your App Name`}
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="min-w-0 bg-gray-800 border-gray-700">
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">4</div>
@@ -357,7 +357,7 @@ BREVO_SENDER_NAME=Your App Name`}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 p-6 rounded-xl border border-yellow-700/30">
+                    <div className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 p-4 sm:p-6 rounded-xl min-w-0 border border-yellow-700/30">
                       <h4 className="text-lg font-semibold text-yellow-400 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
                         Core Authentication Models
@@ -390,7 +390,7 @@ class UserResponse(BaseModel):
                       />
                     </div>
 
-                    <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 p-6 rounded-xl border border-purple-700/30">
+                    <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 p-4 sm:p-6 rounded-xl min-w-0 border border-purple-700/30">
                       <h4 className="text-lg font-semibold text-purple-400 mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                         Password Hashing & JWT Utilities
@@ -429,7 +429,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="min-w-0 bg-gray-800 border-gray-700">
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white font-bold">5</div>
@@ -456,7 +456,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
             </TabsContent>
 
             <TabsContent value="auth" className="mt-8">
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="min-w-0 bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-purple-400">Authentication Demo</CardTitle>
                   <CardDescription className="text-gray-400">Test the authentication system</CardDescription>
@@ -469,7 +469,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
                     </Alert>
                   )}
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold text-white">Sign Up</h3>
                       <Input
@@ -517,7 +517,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
             </TabsContent>
 
             <TabsContent value="verify" className="mt-8">
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="min-w-0 bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-yellow-400">Email Verification</CardTitle>
                   <CardDescription className="text-gray-400">Enter the 5-digit code sent to your email</CardDescription>
@@ -548,7 +548,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
             </TabsContent>
 
             <TabsContent value="dashboard" className="mt-8">
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="min-w-0 bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-green-400">Dashboard</CardTitle>
                   <CardDescription className="text-gray-400">Welcome to your account</CardDescription>
